@@ -17,6 +17,15 @@ class LoadTest(docb.Document):
         handler = docb_handler
 
 
+class Path(docb.Document):
+    project_slug = docb.SlugProperty(required=True, index=True)
+    slug = docb.SlugProperty(required=True,index=True)
+
+    class Meta:
+        use_db = 'dynamodb'
+        handler = docb_handler
+
+
 class LoadTestRequest(docb.Document):
     project_slug = docb.SlugProperty(required=True, index=True)
     path = docb.CharProperty(required=True, index=True)
@@ -24,7 +33,7 @@ class LoadTestRequest(docb.Document):
     assertion_pass = docb.BooleanProperty()
     contains_string = docb.CharProperty()
     status_code = docb.IntegerProperty()
-    content_size = docb.IntegerProperty()
+    response_size = docb.IntegerProperty()
     method_type = docb.CharProperty()
 
     class Meta:

@@ -1,6 +1,7 @@
 import sammy as sm
 
-f = sm.Function('loadlamb_push',
+f = sm.Function(name='loadlambpush',
+                FunctionName='loadlamb-push',
                 CodeUri=sm.S3URI(
                     Bucket=sm.Ref(Ref='Bucket'),
                     Key=sm.Ref(Ref='CodeZipKey')),
@@ -9,7 +10,8 @@ f = sm.Function('loadlamb_push',
                 )
 
 f2 = sm.Function(
-    'loadlamb_pull',
+    name='loadlambpull',
+    FunctionName='loadlamb-pull',
     CodeUri=sm.S3URI(
         Bucket=sm.Ref(Ref='Bucket'),
         Key=sm.Ref(Ref='CodeZipKey')
@@ -19,11 +21,14 @@ f2 = sm.Function(
 )
 
 db = sm.SimpleTable(
-    'loadlamb',PrimaryKey={'Name':'_id','Type':'String'}
+    name='loadlamb',
+    PrimaryKey={'Name':'_id','Type':'String'}
 )
 
 s = sm.SAM(render_type='yaml')
+s.add_parameter(sm.Parameter(name='Bucket', Type='String'))
 
+s.add_parameter(sm.Parameter(name='CodeZipKey', Type='String'))
 s.add_resource(f)
 s.add_resource(f2)
 s.add_resource(db)
