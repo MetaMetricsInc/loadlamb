@@ -1,18 +1,4 @@
-class LoadLambResponse(object):
-    def __init__(self,response,content_str):
-        self.response = response
-        self.content_str = content_str
-
-    def save(self):
-        pass
-
-
-class ContentNotFound(LoadLambResponse):
-    pass
-
-
-class ContentResponse(object):
-    pass
+from loadlamb.response import ContentNotFound
 
 
 class Request(object):
@@ -24,8 +10,10 @@ class Request(object):
         self.session = session
 
     def run(self):
-        path = '{}{}'.format(self.proj_config.get('url'),self.req_config.get('path'))
-        return self.assert_contains(self.session.request(self.req_config.get('method_type'),
+        path = '{}{}'.format(self.proj_config.get('url'),
+                             self.req_config.get('path'))
+        return self.assert_contains(
+            self.session.request(self.req_config.get('method_type'),
                                     path,**self.kwargs))
 
     def assert_contains(self,response):
