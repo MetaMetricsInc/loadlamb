@@ -1,9 +1,24 @@
+import datetime
+import inspect
+import os
+import shutil
+
 import base58
 import importlib
 import re
 
+import boto3
+import pip
 import yaml
 from bs4 import BeautifulSoup
+from unipath import FSPath as path
+
+import loadlamb
+
+from loadlamb.sam import s
+
+
+s3 = boto3.client('s3')
 
 
 def get_form_values(resp):
@@ -39,9 +54,90 @@ def import_util(imp):
 
 
 def create_config_file(config):
-    with open('loadlamb.yml', 'w+') as f:
+    with open('loadlamb.yaml', 'w+') as f:
         f.write(yaml.safe_dump(config, default_flow_style=False))
+
+def read_config_file():
+    with open('loadlamb.yaml','r') as f:
+        c = yaml.load(f.read())
+    return c
 
 def save_sam_template(template):
     with open('sam.yml', 'w+') as f:
         f.write(template.get_template())
+
+
+class Deploy(object):
+
+    config_path = 'loadlamb.yaml'
+    venv = '_venv'
+    requirements_filename = 'loadlamb_requirements.txt'
+    zip_name = 'loadlamb.zip'
+
+    def __init__(self,project_config):
+        self.project_config = project_config
+
+    def install_packages(self,ext_name=None):
+        """
+        Install loadlamb's reqs to the self.venv or install an extension and
+        it's reqs to the self.venv
+        :param ext_name: Name of the extension to install
+        :return:
+        """
+        if not ext_name:
+            #If there is no extension name we can assume we are installing loadlamb's requirements
+            pip.main(['install','-r',
+                  '{}/{}'.format(self.get_loadlamb_path(),self.requirements_filename),
+                  '-t',self.venv])
+        elif ext_name:
+            #If there is an extension name we can assumme it is for an extension
+            pip.main(['install',
+                      '{}/'.format(ext_name),
+                      '-t', self.venv])
+
+    def publish(self):
+        """
+        Runs all of the methods required to build the virtualenv folder,
+        create a zip file, upload that zip file to S3, create a SAM
+        template, and deploy that SAM template.
+        :return:
+        """
+        #Copy loadlamb's files and install reqs to the self.venv folder
+        self.copy_loadlamb()
+        self.install_packages()
+        #Install all of the extensions to the self.venv folder
+        for i in self.project_config.get('extensions',[]):
+            self.install_packages(ext_name=i)
+        #Zip the self.venv folder
+        self.build_zip()
+        #Upload the zip file to the specified bucket in the project config
+        self.upload_zip()
+        s.publish_template(self.project_config.get(
+            'bucket'),'load-lamb-{}.yaml'.format(datetime.datetime.now()))
+        s.publish('loadlamb', Bucket=self.project_config.get('bucket'),
+                  CodeZipKey='loadlamb.zip')
+
+    def get_loadlamb_path(self):
+        """
+        Get loadlamb's path in the user's virtualenv
+        :return: Unipath path object
+        """
+        return path(
+            os.path.dirname(
+                inspect.getsourcefile(loadlamb))).ancestor(1)
+
+    def copy_loadlamb(self):
+        # Get loadlamb's path in the user's virtualenv
+        loadlamb_path = self.get_loadlamb_path()
+        print('Loadlamb Path',loadlamb_path)
+        # Copy loadlamb to self.venv
+        shutil.copytree(loadlamb_path,self.venv)
+
+    def build_zip(self):
+        shutil.make_archive(self.zip_name,'zip',self.venv)
+
+    def upload_zip(self):
+        bucket = self.project_config.get('bucket')
+        print('Uploading Zip {} to {} bucket.'.format(self.zip_name,bucket))
+        s3.upload_file(self.zip_name,bucket,self.zip_name)
+        return bucket, self.zip_name

@@ -16,7 +16,7 @@ setup(
     keywords='load testing, lambda',
     install_requires=parse_requirements('requirements.txt'),
     packages=find_packages(),
-    version='0.1.0',
+    version='0.1.0a',
     entry_points='''
         [console_scripts]
         loadlamb=loadlamb.cli:loadlamb

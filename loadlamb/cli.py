@@ -2,7 +2,7 @@ import os
 
 import click
 
-from loadlamb.utils import create_config_file
+from loadlamb.utils import create_config_file, read_config_file, Deploy
 
 
 @click.group()
@@ -23,9 +23,26 @@ def check_for_project_config_project(ctx,param,value):
 @click.option('--name',prompt=True,callback=check_for_project_config_project)
 @click.option('--url',prompt=True)
 @click.option('--default_user_num',prompt=True)
-def create_project(name,url,default_user_num):
-    create_config_file({'name':name,'url':url,
-                        'default_user_num':default_user_num})
+@click.option('--bucket',prompt=True)
+def create_project(name,url,default_user_num,bucket):
+    create_config_file({
+        'name':name,
+        'url':url,
+        'default_user_num':default_user_num,
+        'bucket':bucket
+    })
+
+@loadlamb.command()
+def execute():
+    pass
+
+
+@loadlamb.command()
+def deploy():
+    c = read_config_file()
+    d = Deploy(c)
+    d.publish()
+
 
 
 if __name__ == '__main__':

@@ -14,7 +14,10 @@ class Request(object):
                              self.req_config.get('path'))
         return self.assert_contains(
             self.session.request(self.req_config.get('method_type'),
-                                    path,**self.kwargs))
+                        path,
+                        timeout=self.req_config.get('timeout')
+                                or self.proj_config.get('timeout',30),
+                                 **self.kwargs))
 
     def assert_contains(self,response):
         c = self.req_config.get('contains')
