@@ -2,7 +2,8 @@ import os
 
 import click
 
-from loadlamb.utils import create_config_file, read_config_file, Deploy
+from loadlamb.utils import create_config_file, read_config_file, Deploy, create_extension_template, execute_loadlamb, \
+    save_sam_template
 
 
 @click.group()
@@ -22,19 +23,30 @@ def check_for_project_config_project(ctx,param,value):
 @loadlamb.command()
 @click.option('--name',prompt=True,callback=check_for_project_config_project)
 @click.option('--url',prompt=True)
-@click.option('--default_user_num',prompt=True)
+@click.option('--user_num',prompt=True)
 @click.option('--bucket',prompt=True)
-def create_project(name,url,default_user_num,bucket):
+def create_project(name,url,user_num,bucket):
     create_config_file({
         'name':name,
         'url':url,
-        'default_user_num':default_user_num,
-        'bucket':bucket
+        'user_num':int(user_num),
+        'bucket':bucket,
+        'tasks':[
+            {'path':'/','method_type':'GET'}
+        ]
     })
+
+
+@loadlamb.command()
+@click.option('--name',prompt=True)
+@click.option('--description',prompt=True)
+def create_extension(name,description):
+    create_extension_template(name,description)
+
 
 @loadlamb.command()
 def execute():
-    pass
+    execute_loadlamb()
 
 
 @loadlamb.command()
@@ -43,7 +55,15 @@ def deploy():
     d = Deploy(c)
     d.publish()
 
+@loadlamb.command()
+def create_package():
+    c = read_config_file()
+    d = Deploy(c)
+    d.create_package()
+    d.remove_venv()
 
-
+@loadlamb.command()
+def create_template():
+    save_sam_template()
 if __name__ == '__main__':
     loadlamb()

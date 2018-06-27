@@ -12,14 +12,15 @@ class Request(object):
     def run(self):
         path = '{}{}'.format(self.proj_config.get('url'),
                              self.req_config.get('path'))
-        return self.assert_contains(
-            self.session.request(self.req_config.get('method_type'),
+        method_type = self.req_config.get('method_type')
+        return self.check_contains(
+            self.session.request(method_type,
                         path,
                         timeout=self.req_config.get('timeout')
                                 or self.proj_config.get('timeout',30),
                                  **self.kwargs))
 
-    def assert_contains(self,response):
+    def check_contains(self,response):
         c = self.req_config.get('contains')
         if c:
             if not c in response.content:
