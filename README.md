@@ -24,14 +24,58 @@ pip install loadlamb
 
 ## CLI
 
+These commands and the project should be created in your project's code repository so you can use your CI/CD toools (travis, circleci, bitbucket pipelines, etc.) to kick off the test when new code is introduced. The CLI assumes you have credentials stored at **~/.aws/credentials** or wherever your OS stores them.
+
 ### Create a New Project
 
+This command creates will ask you a few questions and then create a file named **loadlamb.yaml** that stores those answers along with a sample request.
+ 
+```bash
+loadlamb create_project
+```
 
 ### Deploy LoadLamb
 
+This command uses a SAM template to deploy the Lambda functions (push_handler and pull_handler), DynamoDB table, SNS topic (this will be replaced by SQS when SQS becomes an event source), and a new role via CloudFormation.
+
+```bash
+loadlamb deploy
+```
 
 ### Run LoadLamb
 
+This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SNS (this will change to SQS in the future) message the number. 
+```bash
+loadlamb execute
+```
+
+## Anatomy of the LoadLamb.yaml Config File
+
+### Example File
+
+```yaml
+bucket: your_bucket # The bucket the code (loadlamb.zip) will be uploaded to.
+name: your_project_name # The name of the project
+url: https://example.org # The base url of the site you're testing
+user_num: 50 # The number of users to simulate
+tasks: # Lists of tasks for each simulated user
+- path: / # The path on the site for the request 
+  method_type: GET # The HTTP method that should be used
+  contains: Welcome # Test to make sure the specified text appears on the page
+- path: /login/
+  request_class: loadlamb.contrib.requests.login.RemoteLogin
+  users:
+  - username: your_user
+    password: your_password
+  - username: your_user2
+    password: your_password
+- path: /account/profile/
+  method_type: GET
+  contains: My Profile
+- path: /account/profile/update/
+  method_type: POST
+  contains: Update My Profile
+```
 
 ## Request and Response Classes
 
