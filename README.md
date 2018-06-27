@@ -72,9 +72,17 @@ tasks: # Lists of tasks for each simulated user
 - path: /account/profile/
   method_type: GET
   contains: My Profile
+  payload:
+  - some_url_var: test
+  - some_url_var: test-b
 - path: /account/profile/update/
   method_type: POST
   contains: Update My Profile
+  data:
+  - username: brian
+    address: 123 Any Ln
+  - username: mikejordan
+    address: 123 Broad St
 ```
 
 ## Request and Response Classes
