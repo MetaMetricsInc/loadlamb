@@ -24,12 +24,14 @@ def check_for_project_config_project(ctx,param,value):
 @click.option('--name',prompt=True,callback=check_for_project_config_project)
 @click.option('--url',prompt=True)
 @click.option('--user_num',prompt=True)
+@click.option('--user_batch_size',prompt=True,help='Max value: 10')
 @click.option('--bucket',prompt=True)
-def create_project(name,url,user_num,bucket):
+def create_project(name,url,user_num,user_batch_size,bucket):
     create_config_file({
         'name':name,
         'url':url,
         'user_num':int(user_num),
+        'user_batch_size':int(user_batch_size),
         'bucket':bucket,
         'tasks':[
             {'path':'/','method_type':'GET'}

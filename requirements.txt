@@ -7,6 +7,6 @@ jinja2>=2.10
 pip>=10
 PyYAML>=3.12
 requests>=2.19.0
-sammy>=0.3.7
+sammy>=0.3.8
 troposphere>=2.3.0
 unipath>=1.1

@@ -22,7 +22,8 @@ role = sm.Role(
                   "Action": [ "sts:AssumeRole" ]
                } ]
             },
-    ManagedPolicyArns=['arn:aws:iam::aws:policy/AmazonSQSFullAccess'],
+    ManagedPolicyArns=['arn:aws:iam::aws:policy/AmazonSQSFullAccess',
+                       'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess'],
     RoleName='loadlamb'
 )
 
