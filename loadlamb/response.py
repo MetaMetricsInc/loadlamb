@@ -1,8 +1,29 @@
+from loadlamb.contrib.db.models import LoadTestResponse
+
+
 class Response(object):
-    def __init__(self,response,request_config,project_slug):
+    def __init__(self,response,request_config,project_slug,run_slug):
         self.response = response
         self.request_config = request_config
         self.project_slug = project_slug
+        self.run_slug = run_slug
+
+    def assert_contains(self):
+        try:
+            contains = self.request_config['contains']
+        except KeyError:
+            return True
+        return contains in self.response.content
 
     def save(self):
-        pass
+        ltr = LoadTestResponse(
+            run_slug=self.run_slug,
+            project_slug=self.project_slug,
+            path=self.request_config.get('path'),
+            elapsed_time=self.response.elapsed.total_seconds(),
+            assertion_pass=self.assert_contains(),
+            contains_string=self.request_config.get('contains'),
+            status_code=self.response.status_code,
+            method_type=self.request_config.get('method_type')
+        )
+        ltr.save()

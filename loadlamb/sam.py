@@ -5,10 +5,19 @@ import sammy as sm
 sqs = sm.SQS(name='SQSQueue',QueueName='loadlamb')
 
 sqs_event = sm.SQSEvent(
-    name='loadlamb',
+    name='loadlambsqs',
     Queue=sm.Sub(Sub='arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:loadlamb'),
     BatchSize=1
 )
+
+db = sm.SimpleTable(
+    name='loadlambddb',
+    PrimaryKey={'Name':'_id','Type':'String'}
+)
+
+env = sm.Environment(Variables={
+    'DYNAMODB_TABLE':sm.Ref(Ref='loadlambddb')
+})
 
 role = sm.Role(
     name='loadlambpolicy',
@@ -34,7 +43,8 @@ f = sm.Function(name='loadlambpush',
                     Key=sm.Ref(Ref='CodeZipKey')),
                 Handler='loadlamb.lambdas.push_handler',
                 Runtime='python3.6',
-                Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb')
+                Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
+                Environment=env
                 )
 
 f2 = sm.Function(
@@ -46,13 +56,11 @@ f2 = sm.Function(
     ),
     Handler='loadlamb.lambdas.pull_handler',
     Runtime='python3.6',
-    Events=[sqs_event]
+    Events=[sqs_event],
+    Environment=env
 )
 
-db = sm.SimpleTable(
-    name='loadlamb',
-    PrimaryKey={'Name':'_id','Type':'String'}
-)
+
 
 s = sm.SAM(render_type='yaml')
 s.add_parameter(sm.Parameter(name='CodeBucket', Type='String'))

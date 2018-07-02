@@ -3,9 +3,9 @@ import docb
 from .loading import docb_handler
 
 
-class LoadTest(docb.Document):
-    name = docb.CharProperty(required=True, unique=True)
-    slug = docb.SlugProperty(index=True,unique=True)
+class Run(docb.Document):
+    run_slug = docb.SlugProperty(index=True, unique=True)
+    project_slug = docb.SlugProperty(index=True)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
 
@@ -17,23 +17,14 @@ class LoadTest(docb.Document):
         handler = docb_handler
 
 
-class Path(docb.Document):
+class LoadTestResponse(docb.Document):
     project_slug = docb.SlugProperty(required=True, index=True)
-    slug = docb.SlugProperty(required=True,index=True)
-
-    class Meta:
-        use_db = 'dynamodb'
-        handler = docb_handler
-
-
-class LoadTestRequest(docb.Document):
-    project_slug = docb.SlugProperty(required=True, index=True)
+    run_slug = docb.SlugProperty(required=True)
     path = docb.CharProperty(required=True, index=True)
-    elapsed_time = docb.IntegerProperty()
+    elapsed_time = docb.FloatProperty()
     assertion_pass = docb.BooleanProperty()
     contains_string = docb.CharProperty()
-    status_code = docb.IntegerProperty()
-    response_size = docb.IntegerProperty()
+    status_code = docb.IntegerProperty(required=True)
     method_type = docb.CharProperty()
 
     class Meta:
