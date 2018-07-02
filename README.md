@@ -1,6 +1,6 @@
 # loadlamb
 
-A load testing util built to run on AWS Lambda with Kinesis and DynamoDB.
+A load testing util built to run on AWS Lambda with SQS and DynamoDB.
 
 ## Current Status
 
@@ -46,7 +46,7 @@ loadlamb create_extension
 
 #### Deploy LoadLamb
 
-This command zips the requirement libraries, the core loadlamb code, custom extension, and uses a SAM template to deploy the Lambda functions (push_handler and pull_handler), DynamoDB table, SNS topic (this will be replaced by SQS when SQS becomes an event source), and a new role via CloudFormation.
+This command zips the requirement libraries, the core loadlamb code, custom extension, and uses a SAM template to deploy the Lambda functions (push_handler and pull_handler), DynamoDB table, SQS message, and a new role via CloudFormation.
 
 ```bash
 loadlamb deploy
@@ -54,7 +54,7 @@ loadlamb deploy
 
 #### Run LoadLamb
 
-This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SNS (this will change to SQS in the future) message the number. 
+This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SQS message. 
 ```bash
 loadlamb execute
 ```
