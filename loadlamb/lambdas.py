@@ -2,6 +2,7 @@ import datetime
 import json
 
 import boto3
+from slugify import slugify
 
 from loadlamb.contrib.db.models import Run
 from loadlamb.load import LoadLamb
@@ -12,9 +13,10 @@ sqs = boto3.resource('sqs')
 
 def push_handler(event,context):
     print('User Number',event['user_num'])
-    run_slug = '{}-{}'.format(event['name'],datetime.datetime.now())
+    project_slug = slugify(event['name'])
+    run_slug = slugify('{}-{}'.format(event['name'],datetime.datetime.now()))
     event['run_slug'] = run_slug
-    r = Run(project_slug=event['name'],run_slug=run_slug)
+    r = Run(project_slug=project_slug,run_slug=run_slug)
     r.save()
     q = sqs.get_queue_by_name(QueueName='loadlamb')
     g = grouper(event['user_batch_size'],event['user_num'])
