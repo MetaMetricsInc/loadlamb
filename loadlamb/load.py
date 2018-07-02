@@ -15,7 +15,7 @@ class LoadLamb(object):
         s = requests.Session()
         responses = []
         for i in self.config['tasks']:
-            if i.get('method_type','').lower() in METHOD_TYPES:
+            if i.get('method_type','').lower() in METHOD_TYPES and not i.get('request_class'):
                 r = Request(s,i,self.config)
                 rs = r.run()
                 responses.append(rs)

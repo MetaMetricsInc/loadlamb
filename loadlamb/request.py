@@ -1,6 +1,6 @@
 import random
 
-from loadlamb.response import ContentNotFound
+from loadlamb.response import Response
 
 
 class Request(object):
@@ -28,14 +28,7 @@ class Request(object):
             resp = self.session.request(method_type, path, timeout=timeout, payload=payload)
         else:
             resp = self.session.request(method_type, path, timeout=timeout)
-        return self.check_contains(resp)
-
-    def check_contains(self,response):
-        c = self.req_config.get('contains')
-        if c:
-            if not c in response.content:
-                return ContentNotFound(response,c)
-        return response
+        return Response(resp,self.req_config,self.proj_config.get('name'))
 
     def get_choice(self,choice_list):
         return random.choice(choice_list)

@@ -195,6 +195,9 @@ class Deploy(object):
         s.publish('loadlamb', CodeBucket=self.project_config.get('bucket'),
                   CodeZipKey='loadlamb.zip')
 
+    def unpublish(self):
+        s.unpublish('loadlamb')
+
     def get_loadlamb_path(self):
         """
         Get loadlamb's path in the user's virtualenv
