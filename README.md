@@ -26,7 +26,9 @@ pip install loadlamb
 
 These commands and the project should be created in your project's code repository so you can use your CI/CD toools (travis, circleci, bitbucket pipelines, etc.) to kick off the test when new code is introduced. The CLI assumes you have credentials stored at **~/.aws/credentials** or wherever your OS stores them.
 
-### Create a New Project
+### Essential Commands
+
+#### Create a New Project
 
 This command creates will ask you a few questions and then create a file named **loadlamb.yaml** that stores those answers along with a sample request.
  
@@ -34,19 +36,43 @@ This command creates will ask you a few questions and then create a file named *
 loadlamb create_project
 ```
 
-### Deploy LoadLamb
+#### Create a New Extension
 
-This command uses a SAM template to deploy the Lambda functions (push_handler and pull_handler), DynamoDB table, SNS topic (this will be replaced by SQS when SQS becomes an event source), and a new role via CloudFormation.
+This command creates a new extension. This is useful for creating new request types and tasks that need more than one request.
+
+```bash
+loadlamb create_extension
+``` 
+
+#### Deploy LoadLamb
+
+This command zips the requirement libraries, the core loadlamb code, custom extension, and uses a SAM template to deploy the Lambda functions (push_handler and pull_handler), DynamoDB table, SNS topic (this will be replaced by SQS when SQS becomes an event source), and a new role via CloudFormation.
 
 ```bash
 loadlamb deploy
 ```
 
-### Run LoadLamb
+#### Run LoadLamb
 
 This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SNS (this will change to SQS in the future) message the number. 
 ```bash
 loadlamb execute
+```
+
+### Non-Essential Commands 
+#### Create the SAM Template
+
+This command creates a SAM template named **sam.yml**.
+
+```bash
+loadlamb create_template
+```
+#### Create the Code's Zip File
+
+This command zips the requirement libraries, the core loadlamb code, and custom extensions up in a zip file.
+
+```bash
+loadlamb create_package
 ```
 
 ## Anatomy of the LoadLamb.yaml Config File
@@ -58,6 +84,7 @@ bucket: your_bucket # The bucket the code (loadlamb.zip) will be uploaded to.
 name: your_project_name # The name of the project
 url: https://example.org # The base url of the site you're testing
 user_num: 50 # The number of users to simulate
+user_batch_size: 10 # The number of users we create at a time. Value should be from 1-10
 tasks: # Lists of tasks for each simulated user
 - path: / # The path on the site for the request 
   method_type: GET # The HTTP method that should be used
