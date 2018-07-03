@@ -12,15 +12,17 @@ sqs = boto3.resource('sqs')
 
 def push_handler(event,context):
     print('User Number',event['user_num'])
-    run_slug = '{}-{}'.format(event['name'],datetime.datetime.now())
+    project_slug = slugify(event['name'])
+    run_slug = slugify('{}-{}'.format(event['name'],datetime.datetime.now()))
     event['run_slug'] = run_slug
-    r = Run(project_slug=event['name'],run_slug=run_slug)
+    r = Run(project_slug=project_slug,run_slug=run_slug)
     r.save()
     q = sqs.get_queue_by_name(QueueName='loadlamb')
     g = grouper(event['user_batch_size'],event['user_num'])
     for s in g:
         b = [{'Id':str(i),'MessageBody':json.dumps(event)} for i in range(s)]
         r = q.send_messages(Entries=b)
+
 
 
 
