@@ -14,8 +14,8 @@ db = sm.DynamoDBTable(
     name='loadlambddb',
     TableName='loadlambddb',
     KeySchema=[{'AttributeName':'_id','KeyType':'HASH'}],
-    GlobalSecondaryIndexes=[{'IndexName':'run_slug-index','KeySchema':[{'AttributeName':'_id','KeyType':'HASH'}],'Projection':{'ProjectionType':'ALL'},'ProvisionedThroughput':{'ReadCapacityUnits':5,'WriteCapacityUnits':5}}],
-    AttributeDefinitions=[{'AttributeName':'_id','AttributeType':"S"}],
+    GlobalSecondaryIndexes=[{'IndexName':'run_slug-index','KeySchema':[{'AttributeName':'run_slug','KeyType':'HASH'}],'Projection':{'ProjectionType':'ALL'},'ProvisionedThroughput':{'ReadCapacityUnits':5,'WriteCapacityUnits':5}}],
+    AttributeDefinitions=[{'AttributeName':'_id','AttributeType':'S'},{'AttributeName':'run_slug','AttributeType':'S'}],
     ProvisionedThroughput={'ReadCapacityUnits':5,'WriteCapacityUnits':5}
 )
 
