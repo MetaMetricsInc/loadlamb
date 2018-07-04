@@ -22,7 +22,6 @@ class LoadTestResponse(docb.Document):
     run_slug = docb.SlugProperty(required=True)
     path = docb.CharProperty(required=True, index=True)
     elapsed_time = docb.FloatProperty()
-    assertion_pass = docb.BooleanProperty()
     contains_string = docb.CharProperty()
     status_code = docb.IntegerProperty(required=True)
     method_type = docb.CharProperty()

@@ -13,7 +13,7 @@ class Response(object):
             contains = self.request_config['contains']
         except KeyError:
             return True
-        return contains in self.response.content
+        return contains in str(self.response.content)
 
     def save(self):
         ltr = LoadTestResponse(

@@ -1,6 +1,7 @@
 import random
 
 from loadlamb.request import Request
+from loadlamb.response import Response
 from loadlamb.utils import get_form_values, get_csrf_token
 
 
@@ -18,4 +19,6 @@ class RemoteLogin(Request):
                                         'password': user.get('password'),
                                         'csrfmiddlewaretoken': get_csrf_token(c)})
         self.session.headers.pop('referer')
-        return c
+        return Response(c,self.req_config,
+                        self.proj_config.get('project_slug'),
+                        self.proj_config.get('run_slug'))
