@@ -8,6 +8,6 @@ pip>=10
 python-slugify>=1.2.5
 PyYAML>=3.12
 requests>=2.19.0
-sammy>=0.3.9
+sammy>=0.3.10
 troposphere>=2.3.0
 unipath>=1.1

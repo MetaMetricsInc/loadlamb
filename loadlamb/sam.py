@@ -2,7 +2,11 @@ import sammy as sm
 
 
 
-sqs = sm.SQS(name='SQSQueue',QueueName='loadlamb')
+sqs = sm.SQS(
+    name='SQSQueue',
+    QueueName='loadlamb',
+    VisibilityTimeout=400
+)
 
 sqs_event = sm.SQSEvent(
     name='loadlambsqs',
@@ -48,6 +52,7 @@ f = sm.Function(name='loadlambpush',
                     Key=sm.Ref(Ref='CodeZipKey')),
                 Handler='loadlamb.lambdas.push_handler',
                 Runtime='python3.6',
+                Timeout=300,
                 Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
                 Environment=env
                 )
@@ -61,6 +66,7 @@ f2 = sm.Function(
     ),
     Handler='loadlamb.lambdas.pull_handler',
     Runtime='python3.6',
+    Timeout=300,
     Events=[sqs_event],
     Environment=env
 )

@@ -28,7 +28,9 @@ class Request(object):
             resp = self.session.request(method_type, path, timeout=timeout, payload=payload)
         else:
             resp = self.session.request(method_type, path, timeout=timeout)
-        return Response(resp,self.req_config,self.proj_config.get('name'))
+        return Response(resp,self.req_config,
+                        self.proj_config.get('project_slug'),
+                        self.proj_config.get('run_slug'))
 
     def get_choice(self,choice_list):
         return random.choice(choice_list)
