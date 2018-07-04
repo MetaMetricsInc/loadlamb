@@ -15,11 +15,9 @@ import jinja2
 import yaml
 from pip._internal import main as _main
 from bs4 import BeautifulSoup
-from slugify import slugify
 from unipath import FSPath as path
 
 import loadlamb
-from loadlamb.contrib.db.models import Run
 
 from loadlamb.sam import s
 
@@ -130,15 +128,6 @@ def execute_loadlamb():
         InvocationType='Event',
         Payload=json.dumps(read_config_file()),
     )
-
-def create_run_record(event):
-    project_slug = slugify(event['name'])
-    run_slug = slugify('{}-{}'.format(event['name'],datetime.datetime.now()))
-    event['run_slug'] = run_slug
-    event['project_slug'] = project_slug
-    r = Run(project_slug=project_slug,run_slug=run_slug)
-    r.save()
-    return event
 
 
 class Deploy(object):
