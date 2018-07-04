@@ -10,9 +10,13 @@ sqs_event = sm.SQSEvent(
     BatchSize=1
 )
 
-db = sm.SimpleTable(
+db = sm.DynamoDBTable(
     name='loadlambddb',
-    PrimaryKey={'Name':'_id','Type':'String'}
+    TableName='loadlambddb',
+    KeySchema=[{'AttributeName':'_id','KeyType':'HASH'}],
+    GlobalSecondaryIndexes=[{'IndexName':'run_slug-index','KeySchema':[{'AttributeName':'run_slug','KeyType':'HASH'}],'Projection':{'ProjectionType':'ALL'},'ProvisionedThroughput':{'ReadCapacityUnits':5,'WriteCapacityUnits':5}}],
+    AttributeDefinitions=[{'AttributeName':'_id','AttributeType':'S'},{'AttributeName':'run_slug','AttributeType':'S'}],
+    ProvisionedThroughput={'ReadCapacityUnits':5,'WriteCapacityUnits':5}
 )
 
 env = sm.Environment(Variables={

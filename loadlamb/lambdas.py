@@ -26,6 +26,7 @@ def push_handler(event,context):
 
 
 
+
 def pull_handler(event,context):
     msg = json.loads(event['Records'][0]['body'])
     print(msg)
