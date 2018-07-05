@@ -20,6 +20,7 @@ def create_run_record(event):
     r.save()
     return event
 
+
 def push_handler(event,context):
     print('User Number',event['user_num'])
     event = create_run_record(event)
@@ -28,8 +29,6 @@ def push_handler(event,context):
     for s in g:
         b = [{'Id':str(i),'MessageBody':json.dumps(event)} for i in range(s)]
         r = q.send_messages(Entries=b)
-
-
 
 
 def pull_handler(event,context):

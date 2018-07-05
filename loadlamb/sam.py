@@ -67,6 +67,7 @@ f2 = sm.Function(
     Handler='loadlamb.lambdas.pull_handler',
     Runtime='python3.6',
     Timeout=300,
+    Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
     Events=[sqs_event],
     Environment=env
 )

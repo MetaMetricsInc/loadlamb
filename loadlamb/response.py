@@ -21,7 +21,6 @@ class Response(object):
             project_slug=self.project_slug,
             path=self.request_config.get('path'),
             elapsed_time=self.response.elapsed.total_seconds(),
-            assertion_pass=self.assert_contains(),
             contains_string=self.request_config.get('contains'),
             status_code=self.response.status_code,
             method_type=self.request_config.get('method_type')
