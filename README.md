@@ -8,7 +8,7 @@ Alpha
 
 ## Install
 
-```python
+```python    
 pip install loadlamb
 ```
 
@@ -21,6 +21,23 @@ pip install loadlamb
 5. Configuration should be *MOSTLY** programming language agnostic. So developers, engineers, QA teams alike can use it. 
 6. Keep a persistent record of the test results. This is important so action can be taken if code is pushed that drastically reduces performance.
 7. Extendable with for different workflows (remote login, OpenID, API auth, and etc.)
+
+## How it Works (currently)
+
+**IMPORTANT:** Remember this project is still in its alpha stage. 
+
+### Execute/SQS Push
+
+Currently, the load test kicks off by the CLI invoking the **"Push"** AWS Lambda function sending the config to the function as the event. This function sends the config to the SQS Queue the same number times specified in the **user_num** attribute. 
+
+### Pull messages from SQS/Make Requests
+
+This triggers the **"Pull"** Lambda function, and it makes the requests from the tasks section of the project's config using the Requests library's Session class via the [Request](#request-class) class (loadlamb.request.Request). This happens independently for each user specified in user_num. For example, if you specify 500 users then 500 SQS messages will be sent, triggering 500 Lambdas, which means the tasks will be run 500 times with different sessions. 
+
+### Save Data
+
+After all of the requests are made we save the results in DynamoDB.
+   
 
 ## CLI
 
@@ -114,3 +131,47 @@ tasks: # Lists of tasks for each simulated user
 
 ## Request and Response Classes
 
+### Request Class
+
+The **Request** (loadlamb.request.Request) class is essentially a wrapper around the [Requests ](http://docs.python-requests.org/en/master/) library's Session class. This Session object is passed around from task to task in the Lambda function that pulls from the SQS queue. The easiest way to dissect this is to just look at the code. Below is the current Request class.    
+```python
+class Request(object):
+
+    def __init__(self,session, req_config, proj_config, **kwargs):
+        self.req_config = req_config
+        self.proj_config = proj_config
+        self.kwargs = kwargs
+        self.session = session
+
+    def run(self):
+        path = '{}{}'.format(self.proj_config.get('url'),
+                             self.req_config.get('path'))
+        method_type = self.req_config.get('method_type')
+        data = self.req_config.get('data')
+        payload = self.req_config.get('payload')
+
+        timeout = self.req_config.get('timeout') or \
+                  self.proj_config.get('timeout',30)
+        if data:
+            data = self.get_choice(data)
+            resp = self.session.request(method_type,path,data=data,timeout=timeout)
+        elif payload:
+            payload = self.get_choice(payload)
+            resp = self.session.request(method_type, path, timeout=timeout, payload=payload)
+        else:
+            resp = self.session.request(method_type, path, timeout=timeout)
+        return Response(resp,self.req_config,
+                        self.proj_config.get('project_slug'),
+                        self.proj_config.get('run_slug'))
+
+    def get_choice(self,choice_list):
+        return random.choice(choice_list)
+```
+
+#### Subclassing the Request Class 
+
+If you want to create a new Request class in your extension there are only one method that is required. That is the **run** method.
+
+### Response Class
+
+At this point the main purpose of the Response class is to save the result to DynamoDB. In the future you will be able to subclass it and specify a new class in the config.

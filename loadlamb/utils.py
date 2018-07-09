@@ -121,8 +121,10 @@ def create_extension_template(name,description):
     create_config_file(t)
 
 
-def execute_loadlamb():
-
+def execute_loadlamb(delay=None):
+    config = read_config_file()
+    if delay:
+        config['delay'] = delay
     lm.invoke(
         FunctionName='loadlamb-push',
         InvocationType='Event',

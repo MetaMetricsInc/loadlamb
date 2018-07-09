@@ -47,8 +47,10 @@ def create_extension(name,description):
 
 
 @loadlamb.command()
-def execute():
-    execute_loadlamb()
+@click.option('--delay',
+    help='Delays the load test from starting by the specified number of seconds.')
+def execute(delay):
+    execute_loadlamb(delay)
 
 
 @loadlamb.command()

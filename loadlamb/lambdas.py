@@ -1,5 +1,6 @@
 import datetime
 import json
+import time
 
 import boto3
 from slugify import slugify
@@ -22,6 +23,9 @@ def create_run_record(event):
 
 
 def push_handler(event,context):
+    delay = event.get('delay')
+    if delay:
+        time.sleep(int(delay))
     print('User Number',event['user_num'])
     event = create_run_record(event)
     q = sqs.get_queue_by_name(QueueName='loadlamb')
