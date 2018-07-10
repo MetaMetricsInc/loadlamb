@@ -23,6 +23,7 @@ class Response(object):
             elapsed_time=self.response.elapsed.total_seconds(),
             contains_string=self.request_config.get('contains'),
             status_code=self.response.status_code,
-            method_type=self.request_config.get('method_type')
+            method_type=self.request_config.get('method_type'),
+            body=self.response.content
         )
         ltr.save()
