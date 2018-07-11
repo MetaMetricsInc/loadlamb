@@ -25,6 +25,7 @@ class LoadTestResponse(docb.Document):
     contains_string = docb.CharProperty()
     status_code = docb.IntegerProperty(required=True)
     method_type = docb.CharProperty()
+    body = docb.CharProperty()
 
     class Meta:
         use_db = 'dynamodb'
