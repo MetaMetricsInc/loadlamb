@@ -24,6 +24,6 @@ class Response(object):
             contains_string=self.request_config.get('contains'),
             status_code=self.response.status_code,
             method_type=self.request_config.get('method_type'),
-            body=self.response.content
+            body=str(self.response.content)
         )
         ltr.save()
