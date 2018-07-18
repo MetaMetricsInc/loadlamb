@@ -23,6 +23,9 @@ class LoadLamb(object):
             else:
                 r = import_util(i.get('request_class'))(s,i,self.config)
                 rs = r.run()
-                responses.append(rs)
+                if isinstance(rs,(list,tuple,set)):
+                    responses.extend(rs)
+                else:
+                    responses.append(rs)
                 s = r.session
         return responses
