@@ -19,7 +19,7 @@ class Response(object):
         ltr = LoadTestResponse(
             run_slug=self.run_slug,
             project_slug=self.project_slug,
-            path=self.request_config.get('path'),
+            path=self.response.path,
             elapsed_time=self.response.elapsed.total_seconds(),
             contains_string=self.request_config.get('contains'),
             status_code=self.response.status_code,
