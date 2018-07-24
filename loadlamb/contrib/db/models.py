@@ -23,9 +23,10 @@ class LoadTestResponse(docb.Document):
     path = docb.CharProperty(required=True, index=True)
     elapsed_time = docb.FloatProperty()
     contains_string = docb.CharProperty()
-    status_code = docb.IntegerProperty(required=True)
+    status_code = docb.IntegerProperty(required=True,index=True)
     method_type = docb.CharProperty()
     body = docb.CharProperty()
+    headers = docb.CharProperty()
 
     class Meta:
         use_db = 'dynamodb'

@@ -19,11 +19,12 @@ class Response(object):
         ltr = LoadTestResponse(
             run_slug=self.run_slug,
             project_slug=self.project_slug,
-            path=self.response.path,
+            path=self.response.url,
             elapsed_time=self.response.elapsed.total_seconds(),
             contains_string=self.request_config.get('contains'),
             status_code=self.response.status_code,
-            method_type=self.request_config.get('method_type'),
-            body=str(self.response.content)
+            method_type=self.response.request.method,
+            body=str(self.response.content),
+            headers=self.response.request.headers
         )
         ltr.save()
