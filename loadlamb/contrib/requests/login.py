@@ -52,7 +52,7 @@ class RemoteLogin(Request):
         responses.append(Response(d, self.req_config,
                                   self.proj_config.get('project_slug'),
                                   self.proj_config.get('run_slug')))
-        print(c.url)
+
         e = self.session.post(get_form_action(d),data=get_form_values(d))
         responses.append(Response(e, self.req_config,
                                   self.proj_config.get('project_slug'),

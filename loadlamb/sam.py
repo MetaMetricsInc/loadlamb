@@ -5,13 +5,14 @@ import sammy as sm
 sqs = sm.SQS(
     name='SQSQueue',
     QueueName='loadlamb',
-    VisibilityTimeout=400
+    VisibilityTimeout=400,
+
 )
 
 sqs_event = sm.SQSEvent(
     name='loadlambsqs',
     Queue=sm.Sub(Sub='arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:loadlamb'),
-    BatchSize=1
+    BatchSize=10
 )
 
 db = sm.DynamoDBTable(
