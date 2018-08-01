@@ -2,11 +2,12 @@ import datetime
 import json
 import time
 import logging
+from multiprocessing import Pipe, Process
 
 import boto3
 from slugify import slugify
 
-from loadlamb.contrib.db.models import Run
+from loadlamb.contrib.db.models import Run,LoadTestResponse
 from loadlamb.load import LoadLamb
 from loadlamb.utils import grouper
 
@@ -42,20 +43,59 @@ def push_handler(event,context):
         logging.error(e)
 
 
-def run_loadlamb(msg):
-    responses = LoadLamb(msg).run()
-    for i in responses:
-        i.save()
+class RunLoadLamb(object):
+    """Finds total volume size for all EC2 instances"""
 
+    def __init__(self, event):
+        self.msgs = [json.loads(i['body']) for i in event['Records']]
+
+    def run_loadlamb(self, msg, conn):
+        try:
+            responses = LoadLamb(msg).run()
+            LoadTestResponse.bulk_save(responses)
+        except Exception as e:
+            logging.error(e)
+        conn.close()
+
+    def process_msgs(self):
+        """
+        Lists all EC2 instances in the default region
+        and sums result of instance_volumes
+        """
+        print("Running in parallel")
+
+        # create a list to keep all processes
+        processes = []
+
+        # create a list to keep connections
+        parent_connections = []
+
+        # create a process per instance
+        for msg in self.msgs:
+            # create a pipe for communication
+            parent_conn, child_conn = Pipe()
+            parent_connections.append(parent_conn)
+
+            # create the process, pass instance and connection
+            process = Process(target=self.run_loadlamb, args=(msg, child_conn,))
+            processes.append(process)
+
+        # start all processes
+        for process in processes:
+            process.start()
+
+        # make sure that all processes have finished
+        for process in processes:
+            process.join()
+
+        return "Ok"
 
 def pull_handler(event,context):
     try:
-        msgs = [json.loads(i['body']) for i in event['Records']]
-        for msg in msgs:
-            run_loadlamb(msg)
+        rl = RunLoadLamb(event)
+        return rl.process_msgs()
     except Exception as e:
         # This is a capital crime punishable by death of a project but...
         # I think it is necessary so we don't have runaway lambdas because
         # if we have an error here the message will never come off of the queue
         logging.error(e)
-

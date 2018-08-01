@@ -16,7 +16,7 @@ class Response(object):
         return contains in str(self.response.content)
 
     def save(self):
-        ltr = LoadTestResponse(
+        return LoadTestResponse(
             run_slug=self.run_slug,
             project_slug=self.project_slug,
             path=self.response.url,
@@ -27,4 +27,3 @@ class Response(object):
             body=str(self.response.content),
             headers=self.response.request.headers
         )
-        ltr.save()

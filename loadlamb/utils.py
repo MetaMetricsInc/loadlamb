@@ -34,11 +34,11 @@ CLI_TEMPLATES = jinja2.Environment(loader=jinja2.PackageLoader(
 
 def get_form_values(resp):
     return {i.get('name'): i.get('value') for i in list(
-        BeautifulSoup(resp.content).find('form').children) if i.get('type') == 'hidden'}
+        BeautifulSoup(resp.content,'html5lib').find('form').children) if i.get('type') == 'hidden'}
 
 
 def get_form_action(resp):
-    return BeautifulSoup(resp.content).find('form').attrs['action']
+    return BeautifulSoup(resp.content,'html5lib').find('form').attrs['action']
 
 
 def get_csrf_token(resp):

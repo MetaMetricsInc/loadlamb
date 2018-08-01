@@ -75,7 +75,6 @@ f2 = sm.Function(
 )
 
 
-
 s = sm.SAM(render_type='yaml')
 s.add_parameter(sm.Parameter(name='CodeBucket', Type='String'))
 s.add_parameter(sm.Parameter(name='CodeZipKey', Type='String'))
