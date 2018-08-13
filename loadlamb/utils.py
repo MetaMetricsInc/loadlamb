@@ -138,7 +138,7 @@ class Deploy(object):
     config_path = 'loadlamb.yaml'
     venv = '_venv'
     requirements_filename = 'requirements.txt'
-    zip_name = 'loadlamb.zip'
+
 
     def __init__(self,project_config):
         self.project_config = project_config
@@ -216,11 +216,18 @@ class Deploy(object):
         # Copy loadlamb to self.venv
         shutil.copytree(loadlamb_path,self.venv)
 
+    def get_zip_name(self):
+        try:
+            return self.zip_name
+        except AttributeError:
+            self.zip_name = 'loadlamb-{}.zip'.format(datetime.datetime.now())
+            return self.zip_name
+
     def build_zip(self):
-        shutil.make_archive(self.zip_name.replace('.zip',''),'zip',self.venv)
+        shutil.make_archive(self.get_zip_name().replace('.zip',''),'zip',self.venv)
 
     def upload_zip(self):
         bucket = self.project_config.get('bucket')
-        print('Uploading Zip {} to {} bucket.'.format(self.zip_name,bucket))
-        s3.upload_file(self.zip_name,bucket,self.zip_name)
-        return bucket, self.zip_name
+        print('Uploading Zip {} to {} bucket.'.format(self.get_zip_name(),bucket))
+        s3.upload_file(self.get_zip_name(),bucket,self.get_zip_name())
+        return bucket, self.get_zip_name()

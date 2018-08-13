@@ -16,6 +16,10 @@ class DjangoPost(Request):
         data['csrfmiddlewaretoken'] = get_csrf_token(a)
         b = self.session.request('post', url, data=data)
         self.session.headers.pop('referer')
-        return Response(b,self.req_config,
+        return [
+            Response(a,self.req_config,
+                     self.proj_config.get('project_slug'),
+                     self.proj_config.get('run_slug')),
+            Response(b,self.req_config,
                         self.proj_config.get('project_slug'),
-                        self.proj_config.get('run_slug'))
+                        self.proj_config.get('run_slug'))]
