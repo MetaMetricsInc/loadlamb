@@ -129,7 +129,7 @@ def execute_loadlamb(delay=None):
     lm.invoke(
         FunctionName='loadlamb-push',
         InvocationType='Event',
-        Payload=json.dumps(read_config_file()),
+        Payload=json.dumps(config),
     )
 
 
