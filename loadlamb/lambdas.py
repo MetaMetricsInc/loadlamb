@@ -6,8 +6,9 @@ from multiprocessing import Pipe, Process
 
 import boto3
 from slugify import slugify
+from valley.exceptions import ValidationException
 
-from loadlamb.contrib.db.models import Run,LoadTestResponse
+from loadlamb.contrib.db.models import Project, Run,LoadTestResponse
 from loadlamb.load import LoadLamb
 from loadlamb.utils import grouper
 
@@ -19,6 +20,15 @@ def create_run_record(event):
     run_slug = slugify('{}-{}'.format(event['name'],datetime.datetime.now()))
     event['run_slug'] = run_slug
     event['project_slug'] = project_slug
+    
+    try:
+        p = Project(project_slug=project_slug)
+        p.save()
+    except ValidationException as ve:
+        # If the ValidationException is raised, it is assumed that the project
+        # already exists as a "Project" entry. Ignore and carry on.
+        pass
+    
     r = Run(project_slug=project_slug,run_slug=run_slug)
     r.save()
     return event
