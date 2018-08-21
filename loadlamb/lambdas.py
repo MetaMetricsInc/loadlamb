@@ -39,7 +39,6 @@ def push_handler(event,context):
         delay = event.get('delay')
         if delay:
             time.sleep(int(delay))
-        print('User Number',event['user_num'])
         event = create_run_record(event)
         q = sqs.get_queue_by_name(QueueName='loadlamb')
         g = grouper(event['user_batch_size'],event['user_num'])
@@ -72,7 +71,7 @@ class RunLoadLamb(object):
         Lists all EC2 instances in the default region
         and sums result of instance_volumes
         """
-        print("Running in parallel")
+        
 
         # create a list to keep all processes
         processes = []
