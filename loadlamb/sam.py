@@ -1,5 +1,5 @@
 import sammy as sm
-
+import loadlamb.contrib.db.models as models
 
 sqs = sm.SQS(
     name='SQSQueue',
@@ -14,59 +14,7 @@ sqs_event = sm.SQSEvent(
     BatchSize=10
 )
 
-db = sm.DynamoDBTable(
-    name='loadlambddb',
-    TableName='loadlambddb',
-    KeySchema=[{'AttributeName': '_id', 'KeyType': 'HASH'}],
-    GlobalSecondaryIndexes=[
-        {
-            'IndexName': 'run_slug-index',
-            'KeySchema': [{'AttributeName': 'run_slug', 'KeyType': 'HASH'}],
-            'Projection': {'ProjectionType': 'ALL'},
-            'ProvisionedThroughput': {
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
-            }
-        },
-        {
-            'IndexName': '_doc_type-index',
-            'KeySchema': [{'AttributeName': '_doc_type', 'KeyType': 'HASH'}],
-            'Projection': {'ProjectionType': 'ALL'},
-            'ProvisionedThroughput': {
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
-            }
-        },
-        {
-            'IndexName': 'path-index',
-            'KeySchema': [{'AttributeName': 'path', 'KeyType': 'HASH'}],
-            'Projection': {'ProjectionType': 'ALL'},
-            'ProvisionedThroughput': {
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
-            }
-        },
-        {
-            'IndexName': 'status_code-index',
-            'KeySchema': [{'AttributeName': 'status_code', 'KeyType': 'HASH'}],
-            'Projection': {'ProjectionType': 'ALL'},
-            'ProvisionedThroughput': {
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
-            }
-        },
-        {
-            'IndexName': 'project_slug-index',
-            'KeySchema': [{'AttributeName': 'project_slug', 'KeyType': 'HASH'}],
-            'Projection': {'ProjectionType': 'ALL'},
-            'ProvisionedThroughput': {
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
-            }
-        }
-    ],
-    AttributeDefinitions=[{
-        'AttributeName': '_id',
-        'AttributeType': 'S'
-    },
-        {'AttributeName': 'run_slug', 'AttributeType': 'S'}],
-    ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
-)
+db = models.docb_handler.build_cf_resource('loadlambddb','loadlambddb','dynamodb')
 
 env = sm.Environment(Variables={
     'DYNAMODB_TABLE': sm.Ref(Ref='loadlambddb')

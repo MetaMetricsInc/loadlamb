@@ -44,3 +44,5 @@ class LoadTestResponse(docb.Document):
     class Meta:
         use_db = 'dynamodb'
         handler = docb_handler
+
+docb_handler.add_docs([Project,Run,LoadTestResponse],'dynamodb')

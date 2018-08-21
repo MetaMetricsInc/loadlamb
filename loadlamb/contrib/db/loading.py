@@ -6,6 +6,12 @@ docb_handler = DocbHandler({
         'backend': 'docb.db.DynamoDB',
         'connection': {
             'table': env('DYNAMODB_TABLE')
+        },
+        'config': {
+            'write_capacity':5,
+            'read_capacity':5,
+            'secondary_write_capacity':5,
+            'secondary_read_capacity':5
         }
     }
 })
