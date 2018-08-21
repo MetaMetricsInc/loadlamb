@@ -1,7 +1,6 @@
 import sammy as sm
 
 
-
 sqs = sm.SQS(
     name='SQSQueue',
     QueueName='loadlamb',
@@ -18,28 +17,73 @@ sqs_event = sm.SQSEvent(
 db = sm.DynamoDBTable(
     name='loadlambddb',
     TableName='loadlambddb',
-    KeySchema=[{'AttributeName':'_id','KeyType':'HASH'}],
-    GlobalSecondaryIndexes=[{'IndexName':'run_slug-index','KeySchema':[{'AttributeName':'run_slug','KeyType':'HASH'}],'Projection':{'ProjectionType':'ALL'},'ProvisionedThroughput':{'ReadCapacityUnits':5,'WriteCapacityUnits':5}}],
-    AttributeDefinitions=[{'AttributeName':'_id','AttributeType':'S'},{'AttributeName':'run_slug','AttributeType':'S'}],
-    ProvisionedThroughput={'ReadCapacityUnits':5,'WriteCapacityUnits':5}
+    KeySchema=[{'AttributeName': '_id', 'KeyType': 'HASH'}],
+    GlobalSecondaryIndexes=[
+        {
+            'IndexName': 'run_slug-index',
+            'KeySchema': [{'AttributeName': 'run_slug', 'KeyType': 'HASH'}],
+            'Projection': {'ProjectionType': 'ALL'},
+            'ProvisionedThroughput': {
+                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
+            }
+        },
+        {
+            'IndexName': '_doc_type-index',
+            'KeySchema': [{'AttributeName': '_doc_type', 'KeyType': 'HASH'}],
+            'Projection': {'ProjectionType': 'ALL'},
+            'ProvisionedThroughput': {
+                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
+            }
+        },
+        {
+            'IndexName': 'path-index',
+            'KeySchema': [{'AttributeName': 'path', 'KeyType': 'HASH'}],
+            'Projection': {'ProjectionType': 'ALL'},
+            'ProvisionedThroughput': {
+                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
+            }
+        },
+        {
+            'IndexName': 'status_code-index',
+            'KeySchema': [{'AttributeName': 'status_code', 'KeyType': 'HASH'}],
+            'Projection': {'ProjectionType': 'ALL'},
+            'ProvisionedThroughput': {
+                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
+            }
+        },
+        {
+            'IndexName': 'project_slug-index',
+            'KeySchema': [{'AttributeName': 'project_slug', 'KeyType': 'HASH'}],
+            'Projection': {'ProjectionType': 'ALL'},
+            'ProvisionedThroughput': {
+                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5
+            }
+        }
+    ],
+    AttributeDefinitions=[{
+        'AttributeName': '_id',
+        'AttributeType': 'S'
+    },
+        {'AttributeName': 'run_slug', 'AttributeType': 'S'}],
+    ProvisionedThroughput={'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
 )
 
 env = sm.Environment(Variables={
-    'DYNAMODB_TABLE':sm.Ref(Ref='loadlambddb')
+    'DYNAMODB_TABLE': sm.Ref(Ref='loadlambddb')
 })
 
 role = sm.Role(
     name='loadlambpolicy',
     AssumeRolePolicyDocument={
-               "Version" : "2012-10-17",
-               "Statement": [ {
-                  "Effect": "Allow",
-                  "Principal": {
-                     "Service": [ "lambda.amazonaws.com" ]
-                  },
-                  "Action": [ "sts:AssumeRole" ]
-               } ]
-            },
+        "Version": "2012-10-17",
+        "Statement": [{
+                   "Effect": "Allow",
+                   "Principal": {
+                      "Service": ["lambda.amazonaws.com"]
+                      },
+                   "Action": ["sts:AssumeRole"]
+        }]
+    },
     ManagedPolicyArns=['arn:aws:iam::aws:policy/AmazonSQSFullAccess',
                        'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess',
                        'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'],
@@ -54,7 +98,8 @@ f = sm.Function(name='loadlambpush',
                 Handler='loadlamb.lambdas.push_handler',
                 Runtime='python3.6',
                 Timeout=300,
-                Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
+                Role=sm.Sub(
+                    Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
                 Environment=env
                 )
 
