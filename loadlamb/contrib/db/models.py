@@ -21,6 +21,8 @@ class Run(docb.Document):
     project_slug = docb.SlugProperty(index=True)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
+    url = docb.CharProperty()
+    user_num = docb.IntegerProperty()
 
     def __unicode__(self):
         return self.name

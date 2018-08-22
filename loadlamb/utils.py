@@ -89,7 +89,7 @@ def read_config_file():
 
 
 def save_sam_template():
-    with open('sam.yml', 'w+') as f:
+    with open('template.yaml', 'w+') as f:
         f.write(s.get_template())
 
 

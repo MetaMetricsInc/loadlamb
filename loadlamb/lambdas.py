@@ -20,6 +20,8 @@ def create_run_record(event):
     run_slug = slugify('{}-{}'.format(event['name'],datetime.datetime.now()))
     event['run_slug'] = run_slug
     event['project_slug'] = project_slug
+    url = event['url']
+    user_num = event['user_num']
     
     try:
         p = Project(project_slug=project_slug)
@@ -29,7 +31,7 @@ def create_run_record(event):
         # already exists as a "Project" entry. Ignore and carry on.
         pass
     
-    r = Run(project_slug=project_slug,run_slug=run_slug)
+    r = Run(project_slug=project_slug,run_slug=run_slug,url=url,user_num=user_num)
     r.save()
     return event
 
