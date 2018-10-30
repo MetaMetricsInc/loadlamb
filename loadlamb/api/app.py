@@ -1,10 +1,21 @@
 # from functools import singledispatch
+import sys
+
+sys.path = [
+    '/c/Users/gsmith/workspace/loadlamb/ved/bin',
+    '/c/Users/gsmith/workspace/loadlamb',
+    '/c/Users/gsmith/workspace/loadlamb/ved/lib/python36.zip',
+    '/c/Users/gsmith/workspace/loadlamb/ved/lib/python3.6',
+    '/c/Users/gsmith/workspace/loadlamb/ved/lib/python3.6/lib-dynload',
+    '/usr/local/lib/python3.6',
+    '/c/Users/gsmith/workspace/loadlamb/ved/lib/python3.6/site-packages']
 
 from chalice import Chalice
 
 from loadlamb.contrib.db.models import Project, Run, LoadTestResponse
 
 app = Chalice(app_name='loadlambApi')
+app.debug = True
 
 
 # get_projects, accessible via API /projects GET request, will return
@@ -19,15 +30,15 @@ def get_projects():
 # /runs/{project_slug} GET request, will return a list of unique run slugs
 # that are linked to the specified project.
 @app.route('/projects/{project_slug}')
-@app.route('runs/{project_slug}')
 def get_project_runs(project_slug):
     run_list = list(Run.objects().filter({"project_slug": project_slug}))
     return sorted([i.run_slug for i in run_list], reverse=True)
 
 
-# get_runs, accessible via API /runs/{run_slug} GET request, will return the
+# get_run, accessible via API /runs/{run_slug} GET request, will return the
 # values from a run. Format TBD.
-@app.route('runs/{run_slug}')
+# Seems to hit timeout, which is preventing testing of further functions.
+@app.route('/runs/{run_slug}')
 def get_run(run_slug):
     run_response = LoadTestResponse.objects().filter(
         {"run_slug": run_slug}
@@ -47,7 +58,7 @@ def get_run(run_slug):
 # get_run_summary, accessible via API /runs/summary/{run_slug} GET request,
 # will return a dict with the summary of the run, including average, min, max,
 # good responses (200), and total responses.
-@app.route('runs/summary/{run_slug}')
+@app.route('/runs/summary/{run_slug}')
 def get_run_summary(run_slug):
     run = get_run(run_slug)
 
@@ -80,9 +91,9 @@ def get_run_summary(run_slug):
 #
 # If run with three parameters, the {project_slug} and two {run_slug}, it will
 # compare the two specified slugs as they are input.
-@app.route('runs/compare/{project_slug}/{run_slug_1}/{run_slug_2}')
-@app.route('runs/compare/{project_slug}/{run_slug_2}')
-@app.route('runs/compare/{project_slug}/')
+@app.route('/runs/compare/{project_slug}/{run_slug_1}/{run_slug_2}')
+@app.route('/runs/compare/{project_slug}/{run_slug_1}')
+@app.route('/runs/compare/{project_slug}')
 def get_run_comparison(project_slug=None, run_slug_1=None, run_slug_2=None):
 
     # If no value was specified, then raise an error.
@@ -107,7 +118,7 @@ def get_run_comparison(project_slug=None, run_slug_1=None, run_slug_2=None):
     else:
         # If both are specified, then rearrange them to have the most recent
         # slug as run_slug_1.
-        if run_slug_1 > run_slug_2:
+        if str(run_slug_1) > str(run_slug_2):
             run1 = run_slug_1
             run2 = run_slug_2
         else:
