@@ -2,7 +2,7 @@
 
 from chalice import Chalice
 
-from loadlamb.contrib.db.models import Project, Run, LoadTestResponse
+from chalicelib.contrib.db.models import Project, Run, LoadTestResponse
 
 app = Chalice(app_name='loadlambApi')
 
@@ -82,7 +82,7 @@ def get_run_summary(run_slug):
 # compare the two specified slugs as they are input.
 @app.route('runs/compare/{project_slug}/{run_slug_1}/{run_slug_2}')
 @app.route('runs/compare/{project_slug}/{run_slug_2}')
-@app.route('runs/compare/{project_slug}/')
+@app.route('runs/compare/{project_slug}')
 def get_run_comparison(project_slug=None, run_slug_1=None, run_slug_2=None):
 
     # If no value was specified, then raise an error.
