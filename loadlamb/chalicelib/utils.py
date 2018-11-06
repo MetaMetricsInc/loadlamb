@@ -19,7 +19,9 @@ from unipath import FSPath as path
 
 import loadlamb
 
-from loadlamb.sam import s
+from loadlamb.chalicelib.exceptions import NoConfigError
+from loadlamb.chalicelib.sam import s
+
 
 
 s3 = boto3.client('s3')
@@ -83,8 +85,11 @@ def create_config_file(config):
 
 
 def read_config_file():
-    with open('loadlamb.yaml','r') as f:
-        c = yaml.load(f.read())
+    try:
+        with open('loadlamb.yaml','r') as f:
+            c = yaml.load(f.read())
+    except FileNotFoundError:
+        raise NoConfigError('No loadlamb.yaml file found. Please check your directory or run loadlamb init.')
     return c
 
 
@@ -187,7 +192,7 @@ class Deploy(object):
         Runs all of the methods required to build the virtualenv folder,
         create a zip file, upload that zip file to S3, create a SAM
         template, and deploy that SAM template.
-        :return:
+        :return:        
         """
         self.create_package()
         #Upload the zip file to the specified bucket in the project config
@@ -208,7 +213,7 @@ class Deploy(object):
         """
         return path(
             os.path.dirname(
-                inspect.getsourcefile(loadlamb))).ancestor(1)
+                inspect.getsourcefile(loadlamb)))
 
     def copy_loadlamb(self):
         # Get loadlamb's path in the user's virtualenv

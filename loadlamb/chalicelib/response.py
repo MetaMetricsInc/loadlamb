@@ -1,4 +1,4 @@
-from loadlamb.contrib.db.models import LoadTestResponse
+from loadlamb.chalicelib.contrib.db.models import LoadTestResponse
 
 
 class Response(object):

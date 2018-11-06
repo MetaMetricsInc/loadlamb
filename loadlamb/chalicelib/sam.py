@@ -1,5 +1,5 @@
 import sammy as sm
-import loadlamb.contrib.db.models as models
+import loadlamb.chalicelib.contrib.db.models as models
 
 sqs = sm.SQS(
     name='SQSQueue',

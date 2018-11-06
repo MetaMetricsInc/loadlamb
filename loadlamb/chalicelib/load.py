@@ -1,8 +1,8 @@
 import requests
 
-from loadlamb.request import Request
-from loadlamb.response import Response
-from loadlamb.utils import import_util
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
+from loadlamb.chalicelib.utils import import_util
 
 METHOD_TYPES = ['get', 'post', 'put', 'head', 'delete']
 

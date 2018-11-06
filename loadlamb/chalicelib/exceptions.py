@@ -1,0 +1,2 @@
+class NoConfigError(Exception):
+    pass

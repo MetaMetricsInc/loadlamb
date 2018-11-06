@@ -2,7 +2,8 @@ import os
 
 import click
 
-from loadlamb.utils import create_config_file, read_config_file, Deploy, create_extension_template, execute_loadlamb, \
+from loadlamb.chalicelib.utils import create_config_file, read_config_file, \
+    Deploy, create_extension_template, execute_loadlamb, \
     save_sam_template
 
 
@@ -26,7 +27,7 @@ def check_for_project_config_project(ctx,param,value):
 @click.option('--user_num',prompt=True)
 @click.option('--user_batch_size',prompt=True,help='Max value: 10')
 @click.option('--bucket',prompt=True)
-def create_project(name,url,user_num,user_batch_size,bucket):
+def init(name,url,user_num,user_batch_size,bucket):
     create_config_file({
         'name':name,
         'url':url,

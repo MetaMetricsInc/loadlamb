@@ -1,6 +1,6 @@
 import random
 
-from loadlamb.response import Response
+from loadlamb.chalicelib.response import Response
 
 
 class Request(object):

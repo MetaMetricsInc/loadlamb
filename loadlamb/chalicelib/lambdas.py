@@ -8,9 +8,9 @@ import boto3
 from slugify import slugify
 from valley.exceptions import ValidationException
 
-from loadlamb.contrib.db.models import Project, Run,LoadTestResponse
-from loadlamb.load import LoadLamb
-from loadlamb.utils import grouper
+from loadlamb.chalicelib.contrib.db.models import Project, Run,LoadTestResponse
+from loadlamb.chalicelib.load import LoadLamb
+from loadlamb.chalicelib.utils import grouper
 
 sqs = boto3.resource('sqs')
 
