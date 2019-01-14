@@ -1,9 +1,10 @@
-import requests
+import asyncio
+import concurrent.futures
+import time
 
-from loadlamb.request import Request
-from loadlamb.utils import import_util
+import aiohttp
 
-METHOD_TYPES = ['get','post','put','head','delete']
+from loadlamb.request import User
 
 
 class LoadLamb(object):
@@ -11,18 +12,23 @@ class LoadLamb(object):
     def __init__(self, config):
         self.config = config
 
-    def run(self):
-        s = requests.Session()
-        responses = []
-        for i in self.config['tasks']:
-            if i.get('method_type','').lower() in METHOD_TYPES and not i.get('request_class'):
-                r = Request(s,i,self.config)
-                rs = r.run()
-                responses.append(rs)
-                s = r.session
-            else:
-                r = import_util(i.get('request_class'))(s,i,self.config)
-                rs = r.run()
-                responses.append(rs)
-                s = r.session
-        return responses
+    async def run(self):
+        start_time = time.perf_counter()
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            try:
+                result = await asyncio.gather(*[User(self.config, session).run() for e in range(self.config['user_num'])])
+            except concurrent.futures._base.TimeoutError:
+                return {
+                    'failure': 'Timeout'
+                }
+
+        no_requests = self.config['user_num'] * len(self.config['tasks'])
+        end_time = time.perf_counter()
+        time_taken = end_time - start_time
+        req_per_sec = no_requests / time_taken
+        return {
+            'requests': no_requests,
+            'request_per_second': req_per_sec,
+            'time_taken': time_taken,
+        }

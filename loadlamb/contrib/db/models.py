@@ -4,8 +4,8 @@ from .loading import docb_handler
 
 
 class Run(docb.Document):
-    run_slug = docb.SlugProperty(index=True, unique=True)
-    project_slug = docb.SlugProperty(index=True)
+    run_slug = docb.SlugProperty(global_index=True, unique=True)
+    project_slug = docb.SlugProperty(global_index=True)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
 
@@ -18,9 +18,9 @@ class Run(docb.Document):
 
 
 class LoadTestResponse(docb.Document):
-    project_slug = docb.SlugProperty(required=True, index=True)
+    project_slug = docb.SlugProperty(required=True, global_index=True)
     run_slug = docb.SlugProperty(required=True)
-    path = docb.CharProperty(required=True, index=True)
+    path = docb.CharProperty(required=True, global_index=True)
     elapsed_time = docb.FloatProperty()
     contains_string = docb.CharProperty()
     status_code = docb.IntegerProperty(required=True)
