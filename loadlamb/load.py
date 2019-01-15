@@ -17,7 +17,8 @@ class LoadLamb(object):
         timeout = aiohttp.ClientTimeout(total=30)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             try:
-                result = await asyncio.gather(*[User(self.config, session).run() for e in range(self.config['user_num'])])
+                result = await asyncio.gather(*[User(self.config, session).run() for e in range(
+                    self.config['user_num'])])
             except concurrent.futures._base.TimeoutError:
                 return {
                     'failure': 'Timeout'
