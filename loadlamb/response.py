@@ -2,9 +2,10 @@ from loadlamb.contrib.db.models import LoadTestResponse
 
 
 class Response(object):
-    def __init__(self,response,request_config,project_slug,run_slug):
+    def __init__(self, response, request_config, project_slug, run_slug, time_taken):
         self.response = response
         self.request_config = request_config
+        self.time_taken = time_taken
         self.project_slug = project_slug
         self.run_slug = run_slug
 
@@ -15,14 +16,13 @@ class Response(object):
             return True
         return contains in str(self.response.content)
 
-    def save(self):
-        ltr = LoadTestResponse(
+    def get_ltr(self):
+        return LoadTestResponse(
             run_slug=self.run_slug,
             project_slug=self.project_slug,
             path=self.request_config.get('path'),
-            elapsed_time=self.response.elapsed.total_seconds(),
+            elapsed_time=self.time_taken,
             contains_string=self.request_config.get('contains'),
-            status_code=self.response.status_code,
+            status_code=self.response.status,
             method_type=self.request_config.get('method_type')
         )
-        ltr.save()

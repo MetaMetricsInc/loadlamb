@@ -1,5 +1,6 @@
 import asyncio
 import random
+import time
 
 from loadlamb.response import Response
 from loadlamb.utils import import_util
@@ -43,6 +44,7 @@ class Request(object):
 
         timeout = self.req_config.get('timeout') or \
                   self.proj_config.get('timeout', 30)
+        start_time = time.perf_counter()
         if data:
             data = self.get_choice(data)
             resp = await self.session.request(method_type, path, data=data, timeout=timeout)
@@ -51,9 +53,12 @@ class Request(object):
             resp = await self.session.request(method_type, path, payload=params, timeout=timeout)
         else:
             resp = await self.session.request(method_type, path)
-        return Response(resp, self.req_config,
+        end_time = time.perf_counter()
+        resp = Response(resp, self.req_config,
                         self.proj_config.get('project_slug'),
-                        self.proj_config.get('run_slug'))
+                        self.proj_config.get('run_slug'), end_time - start_time)
+        resp.assert_contains()
+        return resp.get_ltr()
 
     def get_choice(self, choice_list):
         return random.choice(choice_list)

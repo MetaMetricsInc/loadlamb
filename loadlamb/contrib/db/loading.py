@@ -7,15 +7,16 @@ def get_db_kwargs():
         'dynamodb': {
             'connection': {
                 'table': env('DYNAMODB_TABLE')
-            }
+            },
+            'documents': ['loadlamb.contrib.db.models.Run', 'loadlamb.contrib.db.models.LoadTestResponse']
         },
-        'documents': ['loadlamb.contrib.db.models.Run','loadlamb.contrib.db.models.LoadTestResponse']
+
     }
     if env('DYNAMODB_ENDPOINT_URL'):
-        kwargs['config'] = {
+        kwargs['dynamodb']['config'] = {
             'endpoint_url':'http://localhost:8000'
         }
-        kwargs['table_config'] = {
+        kwargs['dynamodb']['table_config'] = {
             'write_capacity': 100,
             'read_capacity': 100,
             'secondary_write_capacity': 100,
@@ -24,10 +25,4 @@ def get_db_kwargs():
     return kwargs
 
 
-docb_handler = DocbHandler({
-    'dynamodb': {
-        'connection': {
-            'table': env('DYNAMODB_TABLE')
-        }
-    }
-})
+docb_handler = DocbHandler(get_db_kwargs())

@@ -6,6 +6,9 @@ from .loading import docb_handler
 class Run(docb.Document):
     run_slug = docb.SlugProperty(global_index=True, unique=True)
     project_slug = docb.SlugProperty(global_index=True)
+    requests = docb.IntegerProperty(required=False, default_value=1)
+    requests_per_second = docb.FloatProperty(required=False, default_value=1)
+    elapsed_time = docb.FloatProperty(required=False, default_value=1)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
 
