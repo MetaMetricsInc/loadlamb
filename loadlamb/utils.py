@@ -124,7 +124,7 @@ def create_extension_template(name,description):
 def execute_loadlamb():
 
     lm.invoke(
-        FunctionName='loadlamb-push',
+        FunctionName='loadlamb-run',
         InvocationType='Event',
         Payload=json.dumps(read_config_file()),
     )
