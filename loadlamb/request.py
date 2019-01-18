@@ -20,7 +20,13 @@ class User(object):
         self.session = session
 
     async def run(self):
-        return await asyncio.gather(*[Request(self.session, i, self.config).run() for i in self.config['tasks']])
+        req_list = list()
+        for i in self.config['tasks']:
+            if i.get('method_type','').lower() in METHOD_TYPES and not i.get('request_class'):
+                req_list.append(Request(self.session, i, self.config).run())
+            else:
+                req_list.append(import_util(i.get('request_class'))(self.session, i, self.config).run())
+        return await asyncio.gather(*req_list)
 
 
 class Request(object):

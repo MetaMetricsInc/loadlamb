@@ -3,5 +3,5 @@ from loadlamb.request import Request
 
 class {{ extension_name }}Request(Request):
 
-    def run(self):
+    async def run(self):
         return super({{ extension_name }}Request,self).run()
