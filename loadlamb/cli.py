@@ -11,7 +11,7 @@ def loadlamb():
     pass
 
 
-def check_for_project_config_project(ctx,param,value):
+def check_for_project_config_project(ctx, param, value):
     if os.path.isfile('loadlamb.yaml'):
         click.echo(click.style('There is already loadlamb.yaml in your '
                                'current directory. Please run this command again after '
@@ -21,29 +21,29 @@ def check_for_project_config_project(ctx,param,value):
 
 
 @loadlamb.command()
-@click.option('--name',prompt=True,callback=check_for_project_config_project)
-@click.option('--url',prompt=True)
-@click.option('--user_num',prompt=True)
-@click.option('--user_batch_size',prompt=True,help='Max value: 10')
-@click.option('--bucket',prompt=True)
-def create_project(name,url,user_num,user_batch_size,bucket):
+@click.option('--name', prompt=True, callback=check_for_project_config_project)
+@click.option('--url', prompt=True)
+@click.option('--user_num', prompt=True)
+@click.option('--user_batch_size', prompt=True, help='Max value: 10')
+@click.option('--bucket', prompt=True)
+def create_project(name, url, user_num, user_batch_size, bucket):
     create_config_file({
-        'name':name,
-        'url':url,
-        'user_num':int(user_num),
-        'user_batch_size':int(user_batch_size),
-        'bucket':bucket,
-        'tasks':[
-            {'path':'/','method_type':'GET'}
+        'name': name,
+        'url': url,
+        'user_num': int(user_num),
+        'user_batch_size': int(user_batch_size),
+        'bucket': bucket,
+        'tasks': [
+            {'path': '/', 'method_type': 'GET'}
         ]
     })
 
 
 @loadlamb.command()
-@click.option('--name',prompt=True)
-@click.option('--description',prompt=True)
-def create_extension(name,description):
-    create_extension_template(name,description)
+@click.option('--name', prompt=True)
+@click.option('--description', prompt=True)
+def create_extension(name, description):
+    create_extension_template(name, description)
 
 
 @loadlamb.command()
@@ -72,8 +72,11 @@ def create_package():
     d.create_package()
     d.remove_venv()
 
+
 @loadlamb.command()
 def create_template():
     save_sam_template()
+
+
 if __name__ == '__main__':
     loadlamb()

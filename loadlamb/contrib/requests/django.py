@@ -9,10 +9,10 @@ class DjangoPost(Request):
 
     async def run(self):
         url = '{}{}'.format(
-            self.proj_config.get('url'),self.req_config.get('path'))
-        a = self.session.request('get',url)
+            self.proj_config.get('url'), self.req_config.get('path'))
+        a = self.session.request('get', url)
         self.session.headers.update({'referer': url})
-        data = random.choice(self.req_config.get('data',{}))
+        data = random.choice(self.req_config.get('data', {}))
         data['csrfmiddlewaretoken'] = get_csrf_token(a)
         b = await self.session.request('post', url, data=data)
         self.session.headers.pop('referer')
