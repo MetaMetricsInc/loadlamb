@@ -44,7 +44,6 @@ async def get_form_action(resp):
 
 def get_csrf_token(resp):
     cookies = resp.cookies
-    print(cookies['csrftoken'].value)
     cookies_keys = cookies.keys()
     if 'zappa' in cookies_keys and not 'csrftoken' in cookies_keys:
         zap_str = str(base58.b58decode(cookies.get('zappa').value))
