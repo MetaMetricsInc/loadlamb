@@ -6,9 +6,13 @@ def get_db_kwargs():
     kwargs = {
         'dynamodb': {
             'connection': {
-                'table': env('DYNAMODB_TABLE')
+                'table': 'loadlambddb'
             },
-            'documents': ['loadlamb.contrib.db.models.Run', 'loadlamb.contrib.db.models.LoadTestResponse']
+            'documents': ['loadlamb.contrib.db.models.Run', 'loadlamb.contrib.db.models.LoadTestResponse'],
+            'table_config':{
+                'write_capacity':2,
+                'read_capacity':2
+            }
         },
 
     }
