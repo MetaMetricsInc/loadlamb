@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import inspect
 import itertools
@@ -31,17 +32,18 @@ CLI_TEMPLATES = jinja2.Environment(loader=jinja2.PackageLoader(
     'loadlamb', 'templates'))
 
 
-def get_form_values(resp):
+async def get_form_values(resp):
+    content = await resp.text()
     return {i.get('name'): i.get('value') for i in list(
-        BeautifulSoup(resp.content).find('form').children) if i.get('type') == 'hidden'}
+        BeautifulSoup(content).find('form').children) if i.get('type') == 'hidden'}
 
 
-def get_form_action(resp):
-    return BeautifulSoup(resp.content).find('form').attrs['action']
+async def get_form_action(resp):
+    return BeautifulSoup(await resp.text()).find('form').attrs['action']
 
 
 def get_csrf_token(resp):
-    cookies = resp.cookies.get_dict()
+    cookies = resp.cookies
     cookies_keys = cookies.keys()
     if 'zappa' in cookies_keys and not 'csrftoken' in cookies_keys:
         zap_str = str(base58.b58decode(cookies.get('zappa')))
