@@ -24,7 +24,7 @@ class RemoteLogin(Request):
                                         'password': user.get('password'),
                                         'csrfmiddlewaretoken': get_csrf_token(c)})
         end_time = time.perf_counter()
-        resp = Response(c, self.req_config,
+        return Response(c, self.req_config,
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), end_time - start_time)
         resp.assert_contains()
