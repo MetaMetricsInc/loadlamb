@@ -9,12 +9,12 @@ class Response(object):
         self.project_slug = project_slug
         self.run_slug = run_slug
 
-    def assert_contains(self):
+    async def assert_contains(self):
         try:
             contains = self.request_config['contains']
         except KeyError:
             return True
-        return contains in str(self.response.content)
+        return contains in str(await self.response.text())
 
     def get_ltr(self):
         return LoadTestResponse(

@@ -8,6 +8,13 @@ from loadlamb.utils import import_util
 METHOD_TYPES = ['get', 'post', 'put', 'head', 'delete']
 
 
+class NullResponse(object):
+
+    def __init__(self):
+        self.status = 408
+        self.content = ''
+
+
 class User(object):
 
     def __init__(self, config, session):
@@ -36,6 +43,17 @@ class Request(object):
         self.proj_config = proj_config
         self.kwargs = kwargs
         self.session = session
+        self.timeout = self.get_timeout()
+
+    def get_null_response(self, timeout):
+        resp = Response(NullResponse(), self.req_config, self.proj_config.get('project_slug'),
+                        self.proj_config.get('run_slug'),
+                        timeout)
+        return resp.get_ltr()
+
+    def get_timeout(self):
+        return self.req_config.get('timeout') or \
+                  self.proj_config.get('timeout', 30)
 
     async def run(self):
         """
@@ -48,22 +66,24 @@ class Request(object):
         data = self.req_config.get('data')
         params = self.req_config.get('params')
 
-        timeout = self.req_config.get('timeout') or \
-                  self.proj_config.get('timeout', 30)
         start_time = time.perf_counter()
-        if data:
-            data = self.get_choice(data)
-            resp = await self.session.request(method_type, path, data=data, timeout=timeout)
-        elif params:
-            params = self.get_choice(params)
-            resp = await self.session.request(method_type, path, payload=params, timeout=timeout)
-        else:
-            resp = await self.session.request(method_type, path)
+        try:
+            if data:
+                data = self.get_choice(data)
+                resp = await self.session.request(method_type, path, data=data, timeout=self.timeout)
+            elif params:
+                params = self.get_choice(params)
+                resp = await self.session.request(method_type, path, payload=params, timeout=self.timeout)
+            else:
+                resp = await self.session.request(method_type, path)
+        except asyncio.TimeoutError:
+            return self.get_null_response(self.timeout)
         end_time = time.perf_counter()
+
         resp = Response(resp, self.req_config,
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), end_time - start_time)
-        resp.assert_contains()
+        await resp.assert_contains()
         return resp.get_ltr()
 
     def get_choice(self, choice_list):

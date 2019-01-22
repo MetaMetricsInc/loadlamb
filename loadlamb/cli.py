@@ -57,7 +57,11 @@ def deploy():
     d = Deploy(c)
     d.publish()
 
-
+@loadlamb.command()
+def update():
+    c = read_config_file()
+    d = Deploy(c)
+    d.update()
 @loadlamb.command()
 def undeploy():
     c = read_config_file()

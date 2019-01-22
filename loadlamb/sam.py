@@ -1,3 +1,5 @@
+import datetime
+
 import sammy as sm
 
 from loadlamb.contrib.db.loading import docb_handler
@@ -5,7 +7,8 @@ from loadlamb.contrib.db.loading import docb_handler
 db = docb_handler.build_cf_resource('loadlambddb', 'loadlambddb', 'dynamodb')
 
 env = sm.Environment(Variables={
-    'DYNAMODB_TABLE': sm.Ref(Ref='loadlambddb')
+    'DYNAMODB_TABLE': sm.Ref(Ref='loadlambddb'),
+    'DEPLOYMENT_DATE': str(datetime.datetime.now())
 })
 
 role = sm.Role(
@@ -33,7 +36,8 @@ f = sm.Function(name='loadlambpush',
                     Key=sm.Ref(Ref='CodeZipKey')),
                 Handler='loadlamb.lambdas.run_handler',
                 Runtime='python3.6',
-                Timeout=300,
+                Timeout=900,
+                MemorySize=3008,
                 Role=sm.Sub(Sub='arn:aws:iam::${AWS::AccountId}:role/loadlamb'),
                 Environment=env
                 )
