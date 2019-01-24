@@ -6,7 +6,7 @@ import time
 import aiohttp
 from slugify import slugify
 
-from loadlamb.contrib.db.models import LoadTestResponse, Run
+from loadlamb.contrib.db.models import LoadTestResponse, Run, Project
 from loadlamb.request import User
 
 
@@ -17,7 +17,11 @@ class LoadLamb(object):
         self.results = None
 
     async def run(self):
+
         project_slug = slugify(self.config['name'])
+        try:
+            pj = Project.objects().get({'project_slug': project_slug})
+        except
         run_slug = slugify('{}-{}'.format(self.config['name'], datetime.datetime.now()))
         run = Run(project_slug=project_slug, run_slug=run_slug)
         run.save()

@@ -16,7 +16,10 @@ class DjangoPost(Request):
         except asyncio.TimeoutError:
             return self.get_null_response(self.timeout)
         data = random.choice(self.req_config.get('data', {}))
-        data['csrfmiddlewaretoken'] = get_csrf_token(a)
+        try:
+            data['csrfmiddlewaretoken'] = get_csrf_token(a)
+        except AttributeError:
+            return self.get_null_response(self.timeout)
         try:
             b = await self.session.request('post', url, data=data, headers={'referer': url})
         except asyncio.TimeoutError:
