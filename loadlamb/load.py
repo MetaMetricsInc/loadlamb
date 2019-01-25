@@ -4,6 +4,7 @@ import datetime
 import time
 
 import aiohttp
+from docb.exceptions import QueryError
 from slugify import slugify
 
 from loadlamb.contrib.db.models import LoadTestResponse, Run, Project
@@ -16,12 +17,22 @@ class LoadLamb(object):
         self.config = config
         self.results = None
 
+    def filter_status_codes(self, starts_with):
+        return len(list(filter(lambda x: str(x.status_code).startswith(starts_with), self.results)))
+
+    def get_or_create_project(self, project_slug):
+        try:
+            Project.objects().get({'project_slug': project_slug})
+        except QueryError:
+            pj = Project(project_slug=project_slug, name=self.config['name'], repo_url=self.config['repo_url'],
+                         url=self.config['url'])
+            pj.save()
+
     async def run(self):
 
         project_slug = slugify(self.config['name'])
-        try:
-            pj = Project.objects().get({'project_slug': project_slug})
-        except
+        self.get_or_create_project(project_slug)
+
         run_slug = slugify('{}-{}'.format(self.config['name'], datetime.datetime.now()))
         run = Run(project_slug=project_slug, run_slug=run_slug)
         run.save()
@@ -49,6 +60,9 @@ class LoadLamb(object):
         self.results = results_list
         run.requests = no_requests
         run.requests_per_second = req_per_sec
+        run.status_200 = self.filter_status_code(2)
+        run.status_400 = self.filter_status_code(4)
+        run.status_500 = self.filter_status_code(5)
         run.elapsed_time = elapsed_time
         run.save()
         LoadTestResponse().bulk_save(self.results)

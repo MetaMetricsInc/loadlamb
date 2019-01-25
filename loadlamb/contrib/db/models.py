@@ -25,6 +25,9 @@ class Run(docb.Document):
     elapsed_time = docb.FloatProperty(required=False)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
+    status_500 = docb.IntegerProperty()
+    status_200 = docb.IntegerProperty()
+    status_400 = docb.IntegerProperty()
 
     def __unicode__(self):
         return self.run_slug
