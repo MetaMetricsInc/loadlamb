@@ -17,7 +17,7 @@ class LoadLamb(object):
         self.config = config
         self.results = None
 
-    def filter_status_codes(self, starts_with):
+    def filter_status_code(self, starts_with):
         return len(list(filter(lambda x: str(x.status_code).startswith(starts_with), self.results)))
 
     def get_or_create_project(self, project_slug):
@@ -60,9 +60,9 @@ class LoadLamb(object):
         self.results = results_list
         run.requests = no_requests
         run.requests_per_second = req_per_sec
-        run.status_200 = self.filter_status_code(2)
-        run.status_400 = self.filter_status_code(4)
-        run.status_500 = self.filter_status_code(5)
+        run.status_200 = self.filter_status_code('2')
+        run.status_400 = self.filter_status_code('4')
+        run.status_500 = self.filter_status_code('5')
         run.elapsed_time = elapsed_time
         run.save()
         LoadTestResponse().bulk_save(self.results)

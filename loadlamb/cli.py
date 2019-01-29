@@ -2,6 +2,7 @@ import os
 
 import click
 
+from loadlamb.contrib.db.models import Run
 from loadlamb.utils import create_config_file, read_config_file, Deploy, create_extension_template, execute_loadlamb, \
     save_sam_template
 
@@ -62,10 +63,8 @@ def deploy():
     d.publish()
 
 @loadlamb.command()
-def update():
-    c = read_config_file()
-    d = Deploy(c)
-    d.update()
+def create_unit_test_table():
+    Run().create_table()
 
 
 @loadlamb.command()

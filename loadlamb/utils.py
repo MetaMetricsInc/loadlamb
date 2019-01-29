@@ -5,6 +5,7 @@ import itertools
 import json
 import os
 import shutil
+import time
 
 import base58
 import importlib
@@ -180,6 +181,9 @@ class Deploy(object):
         # Zip the self.venv folder
         self.build_zip()
 
+    def create_package_name(self):
+        self.zip_name = 'loadlamb-{}.zip'.format(time.time())
+
     def publish(self):
         """
         Runs all of the methods required to build the virtualenv folder,
@@ -187,6 +191,7 @@ class Deploy(object):
         template, and deploy that SAM template.
         :return:
         """
+        self.create_package_name()
         self.create_package()
         # Upload the zip file to the specified bucket in the project config
         self.upload_zip()
@@ -194,7 +199,7 @@ class Deploy(object):
         s.publish_template(self.project_config.get(
             'bucket'), 'load-lamb-{}.yaml'.format(datetime.datetime.now()))
         s.publish('loadlamb', CodeBucket=self.project_config.get('bucket'),
-                  CodeZipKey='loadlamb.zip')
+                  CodeZipKey=self.zip_name)
 
     def unpublish(self):
         s.unpublish('loadlamb')
