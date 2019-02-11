@@ -8,4 +8,5 @@ RUN pip install virtualenv
 RUN virtualenv ve && /code/ve/bin/pip install -U pip
 RUN /code/ve/bin/pip install -r /code/requirements.txt
 RUN /code/ve/bin/pip install -r /code/test_requirements.txt
+RUN /code/ve/bin/pip install -e /code/loadlamb
 WORKDIR /code/loadlamb

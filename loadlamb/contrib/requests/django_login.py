@@ -7,7 +7,7 @@ from loadlamb.response import Response
 from loadlamb.utils import get_csrf_token
 
 
-class DjangoPost(Request):
+class DjangoLogin(Request):
 
     async def run(self):
         url = '{}{}'.format(
@@ -23,15 +23,14 @@ class DjangoPost(Request):
             return self.get_null_response(self.timeout)
         start_time = time.perf_counter()
         try:
-            b = await self.session.request('post', url, data=data, headers={'referer': url})
+            b = await self.session.request('post', a.url, data=data, headers={'referer': url})
         except asyncio.TimeoutError:
             return self.get_null_response(self.timeout)
-
 
         end_time = time.perf_counter()
         time_taken = end_time - start_time
         resp = Response(b, self.req_config,
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), time_taken)
-        resp.assert_contains()
+        await resp.assert_contains()
         return resp.get_ltr()

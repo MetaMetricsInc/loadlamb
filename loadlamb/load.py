@@ -40,8 +40,11 @@ class LoadLamb(object):
         self.config['run_slug'] = run_slug
 
         start_time = time.perf_counter()
-        timeout = aiohttp.ClientTimeout(total=30)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
+        timeout = aiohttp.ClientTimeout(total=self.config.get('timeout',60))
+        conn = aiohttp.TCPConnector()
+        no_requests = self.config['user_num'] * len(self.config['tasks'])
+
+        async with aiohttp.ClientSession(timeout=timeout, connector=conn) as session:
             try:
                 results = await asyncio.gather(*[User(self.config, session).run() for e in range(
                     self.config['user_num'])])
@@ -50,7 +53,7 @@ class LoadLamb(object):
                     'failure': 'Timeout'
                 }
         end_time = time.perf_counter()
-        no_requests = self.config['user_num'] * len(self.config['tasks'])
+
 
         elapsed_time = end_time - start_time
         req_per_sec = no_requests / elapsed_time
@@ -68,6 +71,11 @@ class LoadLamb(object):
         LoadTestResponse().bulk_save(self.results)
 
         return {
+            'project_slug': project_slug,
+            'run_slug': run_slug,
+            'status_200': run.status_200,
+            'status_400': run.status_400,
+            'status_500': run.status_500,
             'requests': no_requests,
             'request_per_second': req_per_sec,
             'time_taken': elapsed_time,

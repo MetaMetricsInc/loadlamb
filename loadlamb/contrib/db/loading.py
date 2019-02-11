@@ -8,9 +8,6 @@ def get_db_kwargs():
             'connection': {
                 'table': 'loadlambddb'
             },
-            'config': {
-                'endpoint_url':'http://dynamodb:8000'
-            },
             'documents': ['loadlamb.contrib.db.models.Run', 'loadlamb.contrib.db.models.LoadTestResponse'],
             'table_config':{
                 'write_capacity':2,
@@ -19,9 +16,7 @@ def get_db_kwargs():
         },
 
     }
-    print('Got Here Before')
     if env('DYNAMODB_ENDPOINT_URL'):
-        print('Got Here After')
         kwargs['dynamodb']['config'] = {
             'endpoint_url':'http://dynamodb:8000'
         }

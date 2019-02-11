@@ -1,21 +1,62 @@
 version: '3.5'
 
 services:
-  web:
+  flask:
     restart: always
     build: .
     expose:
       - "5000"
     ports:
       - 5000:5000
+    volumes:
+      - .:/code/loadlamb
+    command: /code/ve/bin/flask run -h 0.0.0.0
+    env_file: .env
+    working_dir: /code/loadlamb/loadlamb/tests/wsgi/flaskr/
+
+  loadlamb:
+    restart: always
+    build: .
+    expose:
+      - "7000"
+    ports:
+      - 7000:7000
     links:
       - dynamodb:dynamodb
     depends_on:
       - dynamodb
     volumes:
       - .:/code/loadlamb
-    command: /code/ve/bin/flask run -h 0.0.0.0 -p 5000
+    command: /code/ve/bin/chalice local --host 0.0.0.0 --port 7000
     env_file: .env
+    working_dir: /code/loadlamb/loadlamb/loadlambapi/
+
+  web:
+    restart: always
+    build: .
+    links:
+      - dynamodb:dynamodb
+    depends_on:
+      - dynamodb
+      - flask
+      - django
+    volumes:
+      - .:/code/loadlamb
+    env_file: .env
+    working_dir: /code/loadlamb/
+
+  django:
+    restart: always
+    build: .
+    expose:
+      - "8001"
+    ports:
+      - 8001:8001
+    volumes:
+      - .:/code/loadlamb
+    command: /code/ve/bin/python manage.py runserver 0.0.0.0:8001
+    env_file: .env
+    working_dir: /code/loadlamb/loadlamb/tests/wsgi/djangor/
 
   dynamodb:
     image: instructure/dynamo-local-admin

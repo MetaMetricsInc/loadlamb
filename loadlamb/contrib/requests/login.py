@@ -18,9 +18,9 @@ class RemoteLogin(Request):
             a = await self.session.request('get', url, timeout=self.timeout)
         except asyncio.TimeoutError:
             return self.get_null_response(self.timeout)
-
+        login_url = '{}{}'.format(self.proj_config.get('url'), self.req_config.get('login_url'))
         try:
-            b = await self.session.request('post', self.req_config.get('login_url'), data=await get_form_values(a),
+            b = await self.session.request('post', login_url, data=await get_form_values(a),
                                            timeout=self.timeout)
         except asyncio.TimeoutError:
             return self.get_null_response(self.timeout)

@@ -35,8 +35,8 @@ CLI_TEMPLATES = jinja2.Environment(loader=jinja2.PackageLoader(
 
 async def get_form_values(resp):
     content = await resp.text()
-    return {i.get('name'): i.get('value') for i in list(
-        BeautifulSoup(content).find('form').children) if i.get('type') == 'hidden'}
+    form_children = list(filter(lambda x: hasattr(x, 'get'), list(BeautifulSoup(content).find('form').children)))
+    return {i.get('name'): i.get('value') for i in form_children if i.get('type') == 'hidden'}
 
 
 async def get_form_action(resp):
