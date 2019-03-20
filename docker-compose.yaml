@@ -31,20 +31,6 @@ services:
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/loadlambapi/
 
-  web:
-    restart: always
-    build: .
-    links:
-      - dynamodb:dynamodb
-    depends_on:
-      - dynamodb
-      - flask
-      - django
-    volumes:
-      - .:/code/loadlamb
-    env_file: .env
-    working_dir: /code/loadlamb/
-
   django:
     restart: always
     build: .

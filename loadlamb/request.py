@@ -84,7 +84,8 @@ class Request(object):
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), end_time - start_time)
         await resp.assert_contains()
-        return resp.get_ltr()
+        ltr = await resp.get_ltr()
+        return ltr
 
     def get_choice(self, choice_list):
         return random.choice(choice_list)

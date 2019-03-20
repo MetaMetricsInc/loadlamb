@@ -12,34 +12,31 @@ def loadlamb():
     pass
 
 
-def check_for_project_config_project(ctx, param, value):
-    if os.path.isfile('loadlamb.yaml'):
-        click.echo(click.style('There is already loadlamb.yaml in your '
-                               'current directory. Please run this command again after '
-                               'switching to a directory without a loadlamb.yaml', fg='red'))
-        ctx.abort()
-    return value
+def validate_regions(ctx, param, value):
+    return value.replace(" ", "").split(',')
 
 
 @loadlamb.command()
-@click.option('--name', prompt=True, callback=check_for_project_config_project)
+@click.option('--name', prompt=True)
 @click.option('--url', prompt=True)
 @click.option('--repo_url', prompt=True)
 @click.option('--user_num', prompt=True)
 @click.option('--user_batch_size', prompt=True, help='Max value: 10')
-@click.option('--bucket', prompt=True)
-def create_project(name, url, repo_url, user_num, user_batch_size, bucket):
+@click.option('--regions', prompt=True, callback=validate_regions,
+              help='Comma delimited list of AWS region short names. ex. us-east-1, us-east-2')
+@click.option('--filename')
+def create_project(name, url, repo_url, user_num, user_batch_size, regions, filename='loadlamb.yaml'):
     create_config_file({
         'name': name,
         'url': url,
         'repo_url': repo_url,
         'user_num': int(user_num),
         'user_batch_size': int(user_batch_size),
-        'bucket': bucket,
+        'regions': regions,
         'tasks': [
             {'path': '/', 'method_type': 'GET'}
         ]
-    })
+    }, filename=filename)
     click.echo(click.style('Project created successfully.', fg='green'))
 
 
@@ -51,16 +48,21 @@ def create_extension(name, description):
 
 
 @loadlamb.command()
-def execute():
-    execute_loadlamb()
-    
+@click.option('--region')
+@click.option('--filename')
+@click.option('--profile_name')
+def execute(region='us-east-1', filename='loadlamb.yaml', profile_name='default'):
+    execute_loadlamb(region, filename, profile_name)
 
 
 @loadlamb.command()
-def deploy():
-    c = read_config_file()
-    d = Deploy(c)
+@click.option('--filename')
+@click.option('--profile_name')
+def deploy(filename='loadlamb.yaml', profile_name='default'):
+    c = read_config_file(filename)
+    d = Deploy(c, profile_name=profile_name)
     d.publish()
+
 
 @loadlamb.command()
 def create_unit_test_table():
@@ -68,9 +70,11 @@ def create_unit_test_table():
 
 
 @loadlamb.command()
-def undeploy():
-    c = read_config_file()
-    d = Deploy(c)
+@click.option('--filename')
+@click.option('--profile_name')
+def undeploy(filename='loadlamb.yaml', profile_name='default'):
+    c = read_config_file(filename)
+    d = Deploy(c, profile_name=profile_name)
     d.unpublish()
 
 

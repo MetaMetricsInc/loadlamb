@@ -14,11 +14,13 @@ class Response(object):
             contains = self.request_config['contains']
         except KeyError:
             return True
-        return contains in str(await self.response.text())
+        self.text = await self.response.text()
+        return contains in str(self.text)
 
-    def get_ltr(self):
+    async def get_ltr(self):
         return LoadTestResponse(
             run_slug=self.run_slug,
+            body=await self.response.text(),
             project_slug=self.project_slug,
             path=self.request_config.get('path'),
             elapsed_time=self.time_taken,

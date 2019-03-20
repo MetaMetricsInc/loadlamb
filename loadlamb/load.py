@@ -38,45 +38,50 @@ class LoadLamb(object):
         run.save()
         self.config['project_slug'] = project_slug
         self.config['run_slug'] = run_slug
+        try:
+            start_time = time.perf_counter()
+            timeout = aiohttp.ClientTimeout(total=self.config.get('timeout',60))
+            conn = aiohttp.TCPConnector()
+            no_requests = self.config['user_num'] * len(self.config['tasks'])
 
-        start_time = time.perf_counter()
-        timeout = aiohttp.ClientTimeout(total=self.config.get('timeout',60))
-        conn = aiohttp.TCPConnector()
-        no_requests = self.config['user_num'] * len(self.config['tasks'])
-
-        async with aiohttp.ClientSession(timeout=timeout, connector=conn) as session:
-            try:
-                results = await asyncio.gather(*[User(self.config, session).run() for e in range(
-                    self.config['user_num'])])
-            except concurrent.futures._base.TimeoutError:
-                return {
-                    'failure': 'Timeout'
-                }
-        end_time = time.perf_counter()
+            async with aiohttp.ClientSession(timeout=timeout, connector=conn) as session:
+                try:
+                    results = await asyncio.gather(*[User(self.config, session).run() for e in range(
+                        self.config['user_num'])])
+                except concurrent.futures._base.TimeoutError:
+                    return {
+                        'failure': 'Timeout'
+                    }
+            end_time = time.perf_counter()
 
 
-        elapsed_time = end_time - start_time
-        req_per_sec = no_requests / elapsed_time
-        results_list = list()
-        for i in results:
-            results_list.extend(i)
-        self.results = results_list
-        run.requests = no_requests
-        run.requests_per_second = req_per_sec
-        run.status_200 = self.filter_status_code('2')
-        run.status_400 = self.filter_status_code('4')
-        run.status_500 = self.filter_status_code('5')
-        run.elapsed_time = elapsed_time
-        run.save()
-        LoadTestResponse().bulk_save(self.results)
+            elapsed_time = end_time - start_time
+            req_per_sec = no_requests / elapsed_time
+            results_list = list()
+            for i in results:
+                results_list.extend(i)
+            self.results = results_list
+            run.requests = no_requests
+            run.requests_per_second = req_per_sec
+            run.status_200 = self.filter_status_code('2')
+            run.status_400 = self.filter_status_code('4')
+            run.status_500 = self.filter_status_code('5')
+            run.completed = "False"
+            run.elapsed_time = elapsed_time
+            run.save()
+            LoadTestResponse().bulk_save(self.results)
 
-        return {
-            'project_slug': project_slug,
-            'run_slug': run_slug,
-            'status_200': run.status_200,
-            'status_400': run.status_400,
-            'status_500': run.status_500,
-            'requests': no_requests,
-            'request_per_second': req_per_sec,
-            'time_taken': elapsed_time,
-        }
+            return {
+                'project_slug': project_slug,
+                'run_slug': run_slug,
+                'status_200': run.status_200,
+                'status_400': run.status_400,
+                'status_500': run.status_500,
+                'requests': no_requests,
+                'request_per_second': req_per_sec,
+                'time_taken': elapsed_time,
+            }
+        except Exception as e:
+            run.error_msg = str(e)
+            run.completed = True
+            run.save()

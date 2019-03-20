@@ -2,12 +2,9 @@ import datetime
 
 import sammy as sm
 
-from loadlamb.contrib.db.loading import docb_handler
-
-db = docb_handler.build_cf_resource('loadlambddb', 'loadlambddb', 'dynamodb')
 
 env = sm.Environment(Variables={
-    'DYNAMODB_TABLE': sm.Ref(Ref='loadlambddb'),
+    'DYNAMODB_TABLE': 'loadlambddb',
     'DEPLOYMENT_DATE': str(datetime.datetime.now())
 })
 
@@ -47,5 +44,13 @@ s.add_parameter(sm.Parameter(name='CodeBucket', Type='String'))
 s.add_parameter(sm.Parameter(name='CodeZipKey', Type='String'))
 
 s.add_resource(f)
-s.add_resource(db)
-s.add_resource(role)
+
+r = sm.CFT(render_type='yaml')
+
+r.add_resource(role)
+
+bucket = sm.S3(name='bucket')
+output = sm.Output(name='bucket', Description='S3 Topic Details', Value=sm.Ref(Ref='bucket'))
+s3t = sm.CFT(render_type='yaml')
+s3t.add_resource(bucket)
+s3t.add_output(output)

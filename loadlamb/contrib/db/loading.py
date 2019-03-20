@@ -18,7 +18,7 @@ def get_db_kwargs():
     }
     if env('DYNAMODB_ENDPOINT_URL'):
         kwargs['dynamodb']['config'] = {
-            'endpoint_url':'http://dynamodb:8000'
+            'endpoint_url':env('DYNAMODB_ENDPOINT_URL')
         }
         kwargs['dynamodb']['table_config'] = {
             'write_capacity': 100,

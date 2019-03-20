@@ -12,20 +12,17 @@ def get_db_kwargs():
             'connection': {
                 'table': 'loadlambddb'
             },
-            'config': {
-                'endpoint_url':'http://dynamodb:8000'
-            },
             'documents': ['loadlamb.contrib.db.models.Run', 'loadlamb.contrib.db.models.LoadTestResponse'],
-            'table_config':{
-                'write_capacity':2,
-                'read_capacity':2
+            'table_config': {
+                'write_capacity': 100,
+                'read_capacity': 100
             }
         },
 
     }
     if env('DYNAMODB_ENDPOINT_URL'):
         kwargs['dynamodb']['config'] = {
-            'endpoint_url':'http://dynamodb:8000'
+            'endpoint_url': 'http://dynamodb:8000'
         }
         kwargs['dynamodb']['table_config'] = {
             'write_capacity': 100,
@@ -42,14 +39,17 @@ docb_handler = DocbHandler(get_db_kwargs())
 class Run(docb.Document):
     run_slug = docb.SlugProperty(global_index=True, unique=True)
     project_slug = docb.SlugProperty(global_index=True)
-    requests = docb.IntegerProperty(required=False, default_value=1)
-    requests_per_second = docb.FloatProperty(required=False, default_value=1)
-    elapsed_time = docb.FloatProperty(required=False, default_value=1)
+    requests = docb.IntegerProperty(required=False)
+    requests_per_second = docb.FloatProperty(required=False)
+    elapsed_time = docb.FloatProperty(required=False)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
+    status_500 = docb.IntegerProperty()
+    status_200 = docb.IntegerProperty()
+    status_400 = docb.IntegerProperty()
 
     def __unicode__(self):
-        return self.name
+        return self.run_slug
 
     class Meta:
         use_db = 'dynamodb'
@@ -76,7 +76,7 @@ def run_to_json(obj):
     return obj._data
 
 
-@app.route('/')
+@app.route('/', cors=True)
 def projects():
     qs = Run.objects().all()
     return {
@@ -84,17 +84,25 @@ def projects():
     }
 
 
-@app.route('/{project_slug}')
+@app.route('/project/{project_slug}', cors=True)
 def get_project(project_slug):
     qs = Run.objects().filter({'project_slug': project_slug})
     return {
-        'item':{
+        'item': {
             'req_per_sec': qs.mean('requests_per_second'),
         }
     }
 
 
-@app.route('/run/{run_slug}')
+@app.route('/project/{project_slug}/runs', cors=True)
+def get_runs(project_slug):
+    qs = Run.objects().filter({'project_slug': project_slug}, sort_reverse=True, sort_attr='date_created')
+    return {
+        'items': [run_to_json(i) for i in qs]
+    }
+
+
+@app.route('/run/{run_slug}', cors=True)
 def get_run(run_slug):
     obj = Run.objects().get({'run_slug': run_slug})
     return {
@@ -102,8 +110,39 @@ def get_run(run_slug):
     }
 
 
+# @app.route('/run/{run_slug}/ltrs')
+# def get_ltrs(run_slug):
+#     qs = LoadTestResponse.objects().filter({'run_slug': run_slug}, limit=10)
+#     return {
+#         'items': [run_to_json(i) for i in qs]
+#     }
+
+@app.route('/latest-run', cors=True)
+def latest_run():
+    obj_list = Run.objects().all(sort_attr='date_created', sort_reverse=True)
+    try:
+        return {
+            'item': run_to_json(obj_list[0])
+        }
+    except IndexError:
+        return {
+            'error': 'No Runs'
+        }
+
+@app.route('/latest-run/{project_slug}', cors=True)
+def latest_run_project(project_slug):
+    obj_list = Run.objects().filter({'project_slug':project_slug}, sort_attr='date_created', sort_reverse=True)
+    try:
+        return {
+            'item': run_to_json(obj_list[0])
+        }
+    except IndexError:
+        return {
+            'error': 'No Runs'
+        }
+
 @app.route('/run-compare/{run_a}/{run_b}')
-def compare_run(run_a,run_b):
+def compare_run(run_a, run_b):
     obj = Run.objects().get({'run_slug': run_a})
     obj_b = Run.objects().get({'run_slug': run_b})
     return {
