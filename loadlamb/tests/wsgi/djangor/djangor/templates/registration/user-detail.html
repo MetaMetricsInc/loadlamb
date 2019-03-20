@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "My Account" %}{% endblock %}
+
+{% block breadcrumbs %}
+
+    <li class="breadcrumb-item active" aria-current="page">{% trans "My Account" %}</li>
+{% endblock breadcrumbs %}
+
+{% block main %}
+
+   <h2>{{ object.username }}</h2>
+
+
+
+    <h3>Name:</h3>
+    <p>{{ object.first_name }} {{ object.last_name }}</p>
+
+    <h3>Email:</h3>
+    <p>{{ object.email }}</p>
+
+{% endblock %}
+{% block side %}
+
+{% endblock %}

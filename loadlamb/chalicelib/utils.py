@@ -4,6 +4,7 @@ import itertools
 import json
 import os
 import shutil
+import time
 
 import base58
 import importlib
@@ -16,54 +17,53 @@ import yaml
 from pip._internal import main as _main
 from bs4 import BeautifulSoup
 from unipath import FSPath as path
+import sammy as sm
 
 import loadlamb
+from loadlamb.contrib.db.loading import docb_handler
 
-from loadlamb.chalicelib.exceptions import NoConfigError
-from loadlamb.chalicelib.sam import s
+from loadlamb.sam import s, r, s3t
 
 
-
-s3 = boto3.client('s3')
 
 cf = boto3.client('cloudformation')
 
-lm = boto3.client('lambda')
-
 CLI_TEMPLATES = jinja2.Environment(loader=jinja2.PackageLoader(
-    'loadlamb','templates'))
+    'loadlamb', 'templates'))
 
 
-def get_form_values(resp):
-    return {i.get('name'): i.get('value') for i in list(
-        BeautifulSoup(resp.content,'html5lib').find('form').children) if i.get('type') == 'hidden'}
+async def get_form_values(resp):
+    content = await resp.text()
+    form_children = list(filter(lambda x: hasattr(x, 'get'), list(BeautifulSoup(content).find('form').children)))
+    return {i.get('name'): i.get('value') for i in form_children if i.get('type') == 'hidden'}
 
 
-def get_form_action(resp):
-    return BeautifulSoup(resp.content,'html5lib').find('form').attrs['action']
+async def get_form_action(resp):
+    return BeautifulSoup(await resp.text()).find('form').attrs['action']
 
 
 def get_csrf_token(resp):
-    cookies = resp.cookies.get_dict()
+    cookies = resp.cookies
     cookies_keys = cookies.keys()
-
     if 'zappa' in cookies_keys and not 'csrftoken' in cookies_keys:
-        zap_str = str(base58.b58decode(cookies.get('zappa')))
+        zap_str = str(base58.b58decode(cookies.get('zappa').value))
         return re.match(r'^b\'{"csrftoken": "(?P<csrf_token>[-\w]+);',
                         zap_str).group('csrf_token')
-    return cookies.get('csrftoken')
+    return cookies.get('csrftoken').value
 
 
 def grouper(n, total):
     iterable = range(total)
-    def grouper_g(n,iterable):
+
+    def grouper_g(n, iterable):
         it = iter(iterable)
         while True:
-           chunk = tuple(itertools.islice(it, n))
-           if not chunk:
-               return
-           yield len(chunk)
-    return list(grouper_g(n,iterable))
+            chunk = tuple(itertools.islice(it, n))
+            if not chunk:
+                return
+            yield len(chunk)
+
+    return list(grouper_g(n, iterable))
 
 
 def import_util(imp):
@@ -79,28 +79,25 @@ def import_util(imp):
     return getattr(mod, obj_name)
 
 
-def create_config_file(config):
-    with open('loadlamb.yaml', 'w+') as f:
+def create_config_file(config, filename='loadlamb.yaml'):
+    with open(filename, 'w+') as f:
         f.write(yaml.safe_dump(config, default_flow_style=False))
 
 
-def read_config_file():
-    try:
-        with open('loadlamb.yaml','r') as f:
-            c = yaml.load(f.read())
-    except FileNotFoundError:
-        raise NoConfigError('No loadlamb.yaml file found. Please check your directory or run loadlamb init.')
+def read_config_file(config_file=None):
+    with open(config_file or 'loadlamb.yaml', 'r') as f:
+        c = yaml.load(f.read())
     return c
 
 
 def save_sam_template():
-    with open('template.yaml', 'w+') as f:
+    with open('sam.yml', 'w+') as f:
         f.write(s.get_template())
 
 
-def create_extension_template(name,description):
-    class_name = name.title().replace(' ','')
-    path_name = name.lower().replace(' ','_')
+def create_extension_template(name, description):
+    class_name = name.title().replace(' ', '')
+    path_name = name.lower().replace(' ', '_')
     os.makedirs(path_name)
     os.makedirs('{n}/{n}'.format(n=path_name))
     # Create __init__.py
@@ -110,11 +107,11 @@ def create_extension_template(name,description):
     with open('{}/requirements.txt'.format(path_name.lower()), 'w+') as f:
         f.write('')
 
-    with open('{n}/{n}/requests.py'.format(n=path_name.lower()),'w+') as f:
+    with open('{n}/{n}/requests.py'.format(n=path_name.lower()), 'w+') as f:
         request_template = CLI_TEMPLATES.get_template('extension.py.jinja2')
         f.write(request_template.render(extension_name=class_name))
 
-    with open('{}/setup.py'.format(path_name),'w+') as f:
+    with open('{}/setup.py'.format(path_name), 'w+') as f:
         setup_template = CLI_TEMPLATES.get_template('setup.py.jinja2')
         f.write(setup_template.render(extension_name=path_name,
                                       description=description))
@@ -127,28 +124,39 @@ def create_extension_template(name,description):
     create_config_file(t)
 
 
-def execute_loadlamb(delay=None):
-    config = read_config_file()
-    if delay:
-        config['delay'] = delay
+def execute_loadlamb(region_name=None, config_file=None, profile_name='default'):
+    sess = boto3.Session(profile_name=profile_name)
+    lm = sess.client('lambda', region_name=region_name)
     lm.invoke(
-        FunctionName='loadlamb-push',
+        FunctionName='loadlamb-run',
         InvocationType='Event',
-        Payload=json.dumps(config),
+        Payload=json.dumps(read_config_file(config_file=config_file)),
     )
 
 
 class Deploy(object):
-
     config_path = 'loadlamb.yaml'
     venv = '_venv'
     requirements_filename = 'requirements.txt'
+    zip_name = 'loadlamb.zip'
 
-
-    def __init__(self,project_config):
+    def __init__(self, project_config, region_name='us-east-1', profile_name='default'):
         self.project_config = project_config
+        self.region_name = region_name
+        self.profile_name = profile_name
+        self.build_clients_resources(profile_name=self.profile_name, region_name=self.region_name)
 
-    def install_packages(self,ext_name=None):
+    def build_clients_resources(self, profile_name='default', region_name='us-east-1'):
+        self.s = s
+        self.s.build_clients_resources(region_name=region_name, profile_name=profile_name)
+        self.r = r
+        self.r.build_clients_resources(region_name=region_name, profile_name=profile_name)
+        self.s3t = s3t
+        self.s3t.build_clients_resources(region_name=region_name, profile_name=profile_name)
+        self.sess = boto3.Session(region_name=region_name, profile_name=profile_name)
+        self.s3 = self.sess.client('s3')
+
+    def install_packages(self, ext_name=None):
         """
         Install loadlamb's reqs to the self.venv or install an extension and
         it's reqs to the self.venv
@@ -156,16 +164,16 @@ class Deploy(object):
         :return:
         """
         if not ext_name:
-            #If there is no extension name we can assume we are installing loadlamb's requirements
-            _main(['install','-r',
-                  '{}/{}'.format(self.get_loadlamb_path(),self.requirements_filename),
-                  '-t',self.venv])
+            # If there is no extension name we can assume we are installing loadlamb's requirements
+            _main(['install', '-r',
+                   '{}/{}'.format(self.get_loadlamb_path(), self.requirements_filename),
+                   '-t', self.venv])
         elif ext_name:
 
-            #If there is an extension name we can assumme it is for an extension
+            # If there is an extension name we can assumme it is for an extension
             _main(['install',
-                      '{}/'.format(ext_name),
-                      '-t', self.venv,'--src','{}/_src'.format(self.venv)])
+                   '{}/'.format(ext_name),
+                   '-t', self.venv, '--src', '{}/_src'.format(self.venv)])
 
     def remove_zip_venv(self):
         self.remove_venv()
@@ -187,24 +195,58 @@ class Deploy(object):
         # Zip the self.venv folder
         self.build_zip()
 
+    def create_package_name(self):
+        self.zip_name = 'loadlamb-{}.zip'.format(time.time())
+
+    @property
+    def regions(self):
+        return self.project_config['regions']
+
     def publish(self):
         """
         Runs all of the methods required to build the virtualenv folder,
         create a zip file, upload that zip file to S3, create a SAM
         template, and deploy that SAM template.
-        :return:        
+        :return:
         """
+
+        regions = self.project_config['regions']
+        self.create_package_name()
         self.create_package()
-        #Upload the zip file to the specified bucket in the project config
-        self.upload_zip()
+        print('Publishing Loadlamb Role')
+        self.r.publish('loadlamb-role')
+
+        try:
+            for i in regions:
+                self.build_clients_resources(profile_name=self.profile_name, region_name=i)
+                try:
+                    dets = self.s.cf_resource.Stack('loadlamb-bucket')
+                    bucket_name = list(filter(lambda x: x.get('OutputKey') == 'bucket', dets.outputs))[0]['OutputValue']
+                except:
+                    dets = self.s3t.publish('loadlamb-bucket')
+                    bucket_name = list(filter(lambda x: x.get('OutputKey') == 'bucket', dets.outputs))[0]['OutputValue']
+                print('Publishing LoadLamb Code in {} region.'.format(i))
+                # Upload the zip file to the specified bucket in the project config
+                self.upload_zip(bucket_name)
+                loadlamb_config = 'load-lamb-{}.yaml'.format(datetime.datetime.now())
+                self.s.publish_template(bucket_name, loadlamb_config)
+                self.s.publish('loadlamb', CodeBucket=bucket_name, CodeZipKey=self.zip_name)
+        except Exception as e:
+            self.remove_zip_venv()
+            raise sm.DeployFailedError(e)
         self.remove_zip_venv()
-        s.publish_template(self.project_config.get(
-            'bucket'),'load-lamb-{}.yaml'.format(datetime.datetime.now()))
-        s.publish('loadlamb', CodeBucket=self.project_config.get('bucket'),
-                  CodeZipKey='loadlamb.zip')
+        # TODO: Add profile_name to publish_global in DocB
+        try:
+            docb_handler.publish_global('loadlamb', 'loadlambddb', 'loadlambddb', 'dynamodb', replication_groups=regions,
+                                    profile_name=self.profile_name)
+        except Exception:
+            pass
 
     def unpublish(self):
-        s.unpublish('loadlamb')
+        self.r.unpublish('loadlamb-role')
+        for i in self.regions:
+            self.build_clients_resources(profile_name=self.profile_name, region_name=i)
+            self.s.unpublish('loadlamb')
 
     def get_loadlamb_path(self):
         """
@@ -213,26 +255,18 @@ class Deploy(object):
         """
         return path(
             os.path.dirname(
-                inspect.getsourcefile(loadlamb)))
+                inspect.getsourcefile(loadlamb))).ancestor(1)
 
     def copy_loadlamb(self):
         # Get loadlamb's path in the user's virtualenv
         loadlamb_path = self.get_loadlamb_path()
         # Copy loadlamb to self.venv
-        shutil.copytree(loadlamb_path,self.venv)
-
-    def get_zip_name(self):
-        try:
-            return self.zip_name
-        except AttributeError:
-            self.zip_name = 'loadlamb-{}.zip'.format(datetime.datetime.now())
-            return self.zip_name
+        shutil.copytree(loadlamb_path, self.venv)
 
     def build_zip(self):
-        shutil.make_archive(self.get_zip_name().replace('.zip',''),'zip',self.venv)
+        shutil.make_archive(self.zip_name.replace('.zip', ''), 'zip', self.venv)
 
-    def upload_zip(self):
-        bucket = self.project_config.get('bucket')
-        print('Uploading Zip {} to {} bucket.'.format(self.get_zip_name(),bucket))
-        s3.upload_file(self.get_zip_name(),bucket,self.get_zip_name())
-        return bucket, self.get_zip_name()
+    def upload_zip(self, bucket):
+        print('Uploading Zip {} to {} bucket.'.format(self.zip_name, bucket))
+        self.s3.upload_file(self.zip_name, bucket, self.zip_name)
+        return bucket, self.zip_name
