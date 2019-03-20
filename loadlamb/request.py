@@ -14,6 +14,10 @@ class NullResponse(object):
         self.status = 408
         self.content = ''
 
+    async def text(self):
+        return 'Null Response'
+
+
 
 class User(object):
 
@@ -45,11 +49,11 @@ class Request(object):
         self.session = session
         self.timeout = self.get_timeout()
 
-    def get_null_response(self, timeout):
+    async def get_null_response(self, timeout):
         resp = Response(NullResponse(), self.req_config, self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'),
                         timeout)
-        return resp.get_ltr()
+        return await resp.get_ltr()
 
     def get_timeout(self):
         return self.req_config.get('timeout') or \
@@ -77,7 +81,7 @@ class Request(object):
             else:
                 resp = await self.session.request(method_type, path)
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
         end_time = time.perf_counter()
 
         resp = Response(resp, self.req_config,

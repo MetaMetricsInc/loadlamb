@@ -47,6 +47,8 @@ class Run(docb.Document):
     status_500 = docb.IntegerProperty()
     status_200 = docb.IntegerProperty()
     status_400 = docb.IntegerProperty()
+    error_msg = docb.CharProperty()
+    completed = docb.BooleanProperty(default_value=False, required=False)
 
     def __unicode__(self):
         return self.run_slug

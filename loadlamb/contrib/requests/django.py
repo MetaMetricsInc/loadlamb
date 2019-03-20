@@ -15,17 +15,17 @@ class DjangoPost(Request):
         try:
             a = await self.session.request('get', url)
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
         data = random.choice(self.req_config.get('data', {}))
         try:
             data['csrfmiddlewaretoken'] = get_csrf_token(a)
         except AttributeError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
         start_time = time.perf_counter()
         try:
             b = await self.session.request('post', url, data=data, headers={'referer': url})
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
 
 
         end_time = time.perf_counter()
@@ -34,4 +34,4 @@ class DjangoPost(Request):
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), time_taken)
         resp.assert_contains()
-        return resp.get_ltr()
+        return await resp.get_ltr()

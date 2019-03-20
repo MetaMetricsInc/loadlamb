@@ -22,11 +22,10 @@ class LoadLambTestRunner(object):
 class FlaskTestRunner(LoadLambTestRunner):
 
     loadlamb_config = {
-        'bucket': 'goofy',
         'name': 'flask',
         'url': 'http://flask:5000',
         'repo_url': 'https://github.com/metametricsinc/loadlamb',
-        'user_num': 50,
+        'user_num': 10,
         'user_batch_size': 10,
         'tasks': [
             {'path': '/get', 'method_type': 'GET'},
@@ -39,11 +38,10 @@ class FlaskTestRunner(LoadLambTestRunner):
 class DjangoTestRunner(LoadLambTestRunner):
 
     loadlamb_config = {
-        'bucket': 'goofy',
         'name': 'django',
         'url': 'http://django:8001',
         'repo_url': 'https://github.com/metametricsinc/loadlamb',
-        'user_num': 50,
+        'user_num': 10,
         'user_batch_size': 10,
         'tasks': [
             {'path': '/accounts/profile/', 'request_class': 'loadlamb.contrib.requests.django_login.DjangoLogin',

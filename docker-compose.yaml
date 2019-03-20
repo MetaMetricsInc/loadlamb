@@ -31,6 +31,14 @@ services:
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/loadlambapi/
 
+  test:
+    restart: always
+    build: .
+    volumes:
+      - .:/code/loadlamb
+    env_file: .env
+    working_dir: /code/loadlamb/
+
   django:
     restart: always
     build: .

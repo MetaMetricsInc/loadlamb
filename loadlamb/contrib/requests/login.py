@@ -17,18 +17,18 @@ class RemoteLogin(Request):
         try:
             a = await self.session.request('get', url, timeout=self.timeout)
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
         login_url = '{}{}'.format(self.proj_config.get('url'), self.req_config.get('login_url'))
         try:
             b = await self.session.request('post', login_url, data=await get_form_values(a),
                                            timeout=self.timeout)
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
 
         try:
             c = await self.session.request('get', b.url)
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
 
         user = random.choice(self.req_config.get('users'))
         try:
@@ -36,12 +36,12 @@ class RemoteLogin(Request):
                                        data={'username': user.get('username'), 'password': user.get('password'),
                                             'csrfmiddlewaretoken': get_csrf_token(c)})
         except asyncio.TimeoutError:
-            return self.get_null_response(self.timeout)
+            return await self.get_null_response(self.timeout)
 
         end_time = time.perf_counter()
         resp = Response(d, self.req_config,
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), end_time - start_time)
         await resp.assert_contains()
-        return resp.get_ltr()
+        return await resp.get_ltr()
 
