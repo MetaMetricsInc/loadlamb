@@ -8,7 +8,8 @@ from docb.exceptions import QueryError
 from slugify import slugify
 
 from loadlamb.contrib.db.models import LoadTestResponse, Run, Project
-from loadlamb.request import User
+from loadlamb.request import User, Group
+from loadlamb.utils import grouper
 
 
 class LoadLamb(object):
@@ -43,11 +44,11 @@ class LoadLamb(object):
         timeout = aiohttp.ClientTimeout(total=self.config.get('timeout', 60))
         conn = aiohttp.TCPConnector()
 
-
         async with aiohttp.ClientSession(timeout=timeout, connector=conn) as session:
             try:
-                results = await asyncio.gather(*[User(self.config, session).run() for e in range(
-                    self.config['user_num'])])
+                results = await asyncio.gather(
+                    *[Group(no_users, session, self.config, group_no) for group_no, no_users in list(
+                    enumerate(grouper(self.config.get('user_batch_size'), self.config.get('user_num'))))])
             except concurrent.futures._base.TimeoutError:
                 return {
                     'failure': 'Timeout'

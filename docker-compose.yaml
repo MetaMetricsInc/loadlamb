@@ -21,17 +21,12 @@ services:
       - "7000"
     ports:
       - 7000:7000
-    links:
-      - dynamodb:dynamodb
-    depends_on:
-      - dynamodb
     volumes:
       - .:/code/loadlamb
-    command: /code/ve/bin/chalice local --host 0.0.0.0 --port 7000
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/loadlambapi/
-
-  test:
+    command: /code/ve/bin/chalice local --host 0.0.0.0 --port 7000
+  unittest:
     restart: always
     build: .
     volumes:

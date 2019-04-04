@@ -18,6 +18,21 @@ class NullResponse(object):
         return 'Null Response'
 
 
+class Group(object):
+
+    def __init__(self, no_users, session, config, group_no):
+        self.config = config
+        self.group_no = group_no
+        self.session = session
+        self.no_users = no_users
+
+    async def run(self):
+        sleep_time = self.config.get('batch_sleep') * self.group_no
+        await asyncio.sleep(sleep_time)
+        results = await asyncio.gather(
+            *[User(user_no, self.group_no, self.config).run() for user_no in range(self.config.get('user_num'))])
+        return results
+
 
 class User(object):
 

@@ -1,4 +1,5 @@
 import docb
+import requests
 from docb.loading import DocbHandler
 from envs import env
 from chalice import Chalice
@@ -20,7 +21,8 @@ def get_db_kwargs():
         },
 
     }
-    if env('DYNAMODB_ENDPOINT_URL'):
+    if env('DYNAMODB_ENDPOINT_URL', None):
+        print('Got Here')
         kwargs['dynamodb']['config'] = {
             'endpoint_url': 'http://dynamodb:8000'
         }
@@ -80,7 +82,10 @@ def run_to_json(obj):
 
 @app.route('/', cors=True)
 def projects():
+    print(requests.get('http://dnsly.net'))
+    print(Run.get_db())
     qs = Run.objects().all()
+
     return {
         'items': list(set([i.project_slug for i in qs]))
     }
