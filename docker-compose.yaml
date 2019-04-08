@@ -5,9 +5,9 @@ services:
     restart: always
     build: .
     expose:
-      - "5000"
+      - "5001"
     ports:
-      - 5000:5000
+      - 5001:5000
     volumes:
       - .:/code/loadlamb
     command: /code/ve/bin/flask run -h 0.0.0.0
@@ -18,9 +18,9 @@ services:
     restart: always
     build: .
     expose:
-      - "7000"
+      - "7001"
     ports:
-      - 7000:7000
+      - 7001:7000
     volumes:
       - .:/code/loadlamb
     env_file: .env
@@ -51,9 +51,9 @@ services:
     image: instructure/dynamo-local-admin
     restart: always
     expose:
-      - "8000"
+      - "8002"
     ports:
-      - 8000:8000
+      - 8002:8000
     volumes:
       - dynamodata:/var/lib/dynamo
 

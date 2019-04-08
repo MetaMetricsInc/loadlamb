@@ -1,25 +1,26 @@
 import asyncio
 import concurrent.futures
 import datetime
+import itertools
 import time
 
 import aiohttp
 from docb.exceptions import QueryError
 from slugify import slugify
 
-from loadlamb.contrib.db.models import LoadTestResponse, Run, Project
+from loadlamb.contrib.db.models import LoadTestResponse, Run, Project, Group as GroupModel
 from loadlamb.request import User, Group
 from loadlamb.utils import grouper
 
 
 class LoadLamb(object):
 
-    def __init__(self, config):
+    def __init__(self, config, commit=None):
         self.config = config
-        self.results = None
+        self.commit = commit
+        self.responses = None
+        self.groups = None
 
-    def filter_status_code(self, starts_with):
-        return len(list(filter(lambda x: str(x.status_code).startswith(starts_with), self.results)))
 
     def get_or_create_project(self, project_slug):
         try:
@@ -35,7 +36,7 @@ class LoadLamb(object):
         self.get_or_create_project(project_slug)
 
         run_slug = slugify('{}-{}'.format(self.config['name'], datetime.datetime.now()))
-        run = Run(project_slug=project_slug, run_slug=run_slug)
+        run = Run(project_slug=project_slug, run_slug=run_slug, commit=self.commit)
         run.save()
         self.config['project_slug'] = project_slug
         self.config['run_slug'] = run_slug
@@ -47,8 +48,8 @@ class LoadLamb(object):
         async with aiohttp.ClientSession(timeout=timeout, connector=conn) as session:
             try:
                 results = await asyncio.gather(
-                    *[Group(no_users, session, self.config, group_no) for group_no, no_users in list(
-                    enumerate(grouper(self.config.get('user_batch_size'), self.config.get('user_num'))))])
+                    *[Group(no_users, session, self.config, group_no).run() for group_no, no_users in list(
+                    enumerate(grouper(self.config.get('user_batch_size'), self.config.get('user_num')), 1))])
             except concurrent.futures._base.TimeoutError:
                 return {
                     'failure': 'Timeout'
@@ -56,25 +57,38 @@ class LoadLamb(object):
         end_time = time.perf_counter()
 
         elapsed_time = end_time - start_time
-        req_per_sec = no_requests / elapsed_time
-        results_list = list()
+
         try:
+            self.groups = results
+            self.responses = list(itertools.chain.from_iterable([g.responses for g in results]))
 
-            for i in results:
-
-                results_list.extend(i)
-
-            self.results = results_list
+            GroupModel().bulk_save(self.groups)
+            LoadTestResponse().bulk_save(self.responses)
             run.requests = no_requests
-            run.requests_per_second = req_per_sec
-            run.status_200 = self.filter_status_code('2')
-            run.status_400 = self.filter_status_code('4')
-            run.status_500 = self.filter_status_code('5')
-            run.completed = "False"
+            run.requests_per_second = GroupModel.objects().filter({'project_slug': project_slug,
+                                         'run_slug': run_slug}).mean('requests_per_second')
+
+            try:
+                run.status_200 = GroupModel.objects().filter({'project_slug': project_slug,
+                                         'run_slug': run_slug}).sum('status_200')
+            except TypeError:
+                run.status_200 = 0
+            try:
+                run.status_400 = GroupModel.objects().filter({'project_slug': project_slug,
+                                         'run_slug': run_slug}).sum('status_400')
+            except TypeError:
+                run.status_400 = 0
+
+            try:
+                run.status_500 = GroupModel.objects().filter({'project_slug': project_slug,
+                                         'run_slug': run_slug}).sum('status_500')
+            except TypeError:
+                run.status_500 = 0
+
+            run.completed = True
             run.elapsed_time = elapsed_time
-            run.error_msg = ''
+            run.commit = self.commit
             run.save()
-            LoadTestResponse().bulk_save(self.results)
 
             return {
                 'project_slug': project_slug,
@@ -83,13 +97,14 @@ class LoadLamb(object):
                 'status_400': run.status_400,
                 'status_500': run.status_500,
                 'requests': no_requests,
-                'request_per_second': req_per_sec,
+                'request_per_second': run.requests_per_second,
                 'time_taken': elapsed_time,
             }
 
         except Exception as e:
             run.error_msg = str(e)
-            run.completed = True
+            run.requests_per_second = 0
+            run.completed = False
             run.requests = no_requests
             run.save()
             return {
