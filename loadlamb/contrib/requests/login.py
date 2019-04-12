@@ -41,7 +41,7 @@ class RemoteLogin(Request):
         end_time = time.perf_counter()
         resp = Response(d, self.req_config,
                         self.proj_config.get('project_slug'),
-                        self.proj_config.get('run_slug'), end_time - start_time)
+                        self.proj_config.get('run_slug'), end_time - start_time, self.user_no, self.group_no)
         await resp.assert_contains()
         return await resp.get_ltr()
 

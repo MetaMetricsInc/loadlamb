@@ -26,6 +26,8 @@ class Run(docb.Document):
     commit = docb.CharProperty(required=False)
     last_updated = docb.DateTimeProperty(auto_now=True)
     date_created = docb.DateTimeProperty(auto_now_add=True)
+    user_batch_size = docb.IntegerProperty(required=False)
+    user_batch_sleep = docb.IntegerProperty(required=False)
     status_500 = docb.IntegerProperty()
     status_200 = docb.IntegerProperty()
     status_400 = docb.IntegerProperty()

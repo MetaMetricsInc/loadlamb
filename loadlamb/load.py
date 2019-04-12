@@ -36,7 +36,8 @@ class LoadLamb(object):
         self.get_or_create_project(project_slug)
 
         run_slug = slugify('{}-{}'.format(self.config['name'], datetime.datetime.now()))
-        run = Run(project_slug=project_slug, run_slug=run_slug, commit=self.commit)
+        run = Run(project_slug=project_slug, run_slug=run_slug, user_batch_size=self.config['user_batch_size'],
+                  user_batch_sleep=self.config['user_batch_sleep'], commit=self.commit)
         run.save()
         self.config['project_slug'] = project_slug
         self.config['run_slug'] = run_slug

@@ -95,7 +95,7 @@ def save_sam_template():
         f.write(s.get_template())
 
 
-def create_extension_template(name, description):
+def create_extension_template(name, description, config_file='loadlamb.yaml'):
     class_name = name.title().replace(' ', '')
     path_name = name.lower().replace(' ', '_')
     os.makedirs(path_name)
@@ -116,12 +116,12 @@ def create_extension_template(name, description):
         f.write(setup_template.render(extension_name=path_name,
                                       description=description))
 
-    t = read_config_file()
+    t = read_config_file(config_file=config_file)
     exts = t.get('extensions', [])
     exts.append(path_name)
     exts = list(set(exts))
     t['extensions'] = exts
-    create_config_file(t)
+    create_config_file(t, filename=config_file)
 
 
 def execute_loadlamb(region_name=None, config_file=None, profile_name='default'):

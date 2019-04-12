@@ -27,6 +27,7 @@ class FlaskTestRunner(LoadLambTestRunner):
         'repo_url': 'https://github.com/metametricsinc/loadlamb',
         'user_num': 10,
         'user_batch_size': 10,
+        'user_batch_sleep': 2,
         'tasks': [
             {'path': '/get', 'method_type': 'GET'},
             {'path': '/post', 'method_type': 'POST'},
@@ -43,6 +44,7 @@ class DjangoTestRunner(LoadLambTestRunner):
         'repo_url': 'https://github.com/metametricsinc/loadlamb',
         'user_num': 10,
         'user_batch_size': 10,
+        'user_batch_sleep': 2,
         'tasks': [
             {'path': '/accounts/profile/', 'request_class': 'loadlamb.contrib.requests.django_login.DjangoLogin',
              'data': [{'username': 'loadlamb', 'password': '12345678'},
@@ -54,7 +56,7 @@ class DjangoTestRunner(LoadLambTestRunner):
 
 def test_flask():
     runner = FlaskTestRunner()
-    result = runner.loop.run_until_complete(asyncio.wait_for(runner.run_loadlamb(),300))
+    result = runner.loop.run_until_complete(asyncio.wait_for(runner.run_loadlamb(), 300))
     run = Run.objects().get({'run_slug': result['run_slug']})
     assert runner.no_requests == result['requests']
     assert runner.no_requests / 3 == run.status_500
