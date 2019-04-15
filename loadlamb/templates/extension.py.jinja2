@@ -1,0 +1,7 @@
+from loadlamb.request import Request
+
+
+class {{ extension_name }}Request(Request):
+
+    async def run(self):
+        return super({{ extension_name }}Request,self).run()
