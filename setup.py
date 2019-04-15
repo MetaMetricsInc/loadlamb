@@ -17,7 +17,7 @@ setup(
     install_requires=parse_requirements('requirements.txt'),
     packages=find_packages(),
     include_package_data=True,
-    version='0.5.0a',
+    version='0.5.0',
     entry_points='''
         [console_scripts]
         loadlamb=loadlamb.cli:loadlamb
