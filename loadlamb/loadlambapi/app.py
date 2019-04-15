@@ -115,6 +115,9 @@ def get_run(run_slug):
     }
 
 
+@app.route('/run/{run_slug}/groups', cors=True)
+def get_groups(run_slug):
+    qs = Gr
 # @app.route('/run/{run_slug}/ltrs')
 # def get_ltrs(run_slug):
 #     qs = LoadTestResponse.objects().filter({'run_slug': run_slug}, limit=10)
