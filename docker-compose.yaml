@@ -10,7 +10,7 @@ services:
       - 5001:5000
     volumes:
       - .:/code/loadlamb
-    command: /code/ve/bin/flask run -h 0.0.0.0
+    command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/flask run -h 0.0.0.0
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/tests/wsgi/flaskr/
 
@@ -25,7 +25,7 @@ services:
       - .:/code/loadlamb
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/loadlambapi/
-    command: /code/ve/bin/chalice local --host 0.0.0.0 --port 7000
+    command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/chalice local --host 0.0.0.0 --port 7000
   unittest:
     restart: always
     build: .
@@ -43,7 +43,7 @@ services:
       - 8001:8001
     volumes:
       - .:/code/loadlamb
-    command: /code/ve/bin/python manage.py runserver 0.0.0.0:8001
+    command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/python manage.py runserver 0.0.0.0:8001
     env_file: .env
     working_dir: /code/loadlamb/loadlamb/tests/wsgi/djangor/
 
