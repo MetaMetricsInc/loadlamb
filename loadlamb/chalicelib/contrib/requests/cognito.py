@@ -19,7 +19,7 @@ class CogntioRequest(Request):
         Executes a single request
         :return: Response class
         """
-        path = '{}{}'.format(self.proj_config.get('url'),
+        path = '{}{}'.format(self.get_url(),
                              self.req_config.get('path'))
 
         method_type = self.req_config.get('method_type')

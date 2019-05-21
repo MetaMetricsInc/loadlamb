@@ -11,7 +11,7 @@ class DjangoLogin(Request):
 
     async def run(self):
         url = '{}{}'.format(
-            self.proj_config.get('url'), self.req_config.get('path'))
+            self.get_url(), self.req_config.get('path'))
         try:
             a = await self.session.request('get', url)
         except asyncio.TimeoutError:

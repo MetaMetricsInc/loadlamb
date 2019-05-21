@@ -11,7 +11,7 @@ class RemoteLogin(Request):
 
     async def run(self):
         url = '{}{}'.format(
-            self.proj_config.get('url'),self.req_config.get('path'))
+            self.get_url(), self.req_config.get('path'))
 
         start_time = time.perf_counter()
         try:
