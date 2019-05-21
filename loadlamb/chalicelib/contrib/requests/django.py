@@ -2,9 +2,9 @@ import asyncio
 import random
 import time
 
-from loadlamb.request import Request
-from loadlamb.response import Response
-from loadlamb.utils import get_csrf_token
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
+from loadlamb.chalicelib.utils import get_csrf_token
 
 
 class DjangoPost(Request):

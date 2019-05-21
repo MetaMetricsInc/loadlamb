@@ -3,9 +3,9 @@ import itertools
 import random
 import time
 
-from loadlamb.response import Response
-from loadlamb.utils import import_util
-from loadlamb.contrib.db.models import Group as GroupModel
+from loadlamb.chalicelib.response import Response
+from loadlamb.chalicelib.utils import import_util
+from loadlamb.chalicelib.contrib.db.models import Group as GroupModel
 
 METHOD_TYPES = ['get', 'post', 'put', 'head', 'delete']
 
@@ -99,12 +99,20 @@ class Request(object):
         return self.req_config.get('timeout') or \
                   self.proj_config.get('timeout', 30)
 
+    def get_url(self):
+        try:
+            stg = next(filter(lambda x: x.get('name') == self.proj_config.get('active_stage'),
+                     self.proj_config.get('stages', [])))
+        except StopIteration:
+            stg = {}
+        return stg.get('url')
+
     async def run(self):
         """
         Executes a single request
         :return: Response class
         """
-        path = '{}{}'.format(self.proj_config.get('url'),
+        path = '{}{}'.format(self.get_url(),
                              self.req_config.get('path'))
         method_type = self.req_config.get('method_type')
         data = self.req_config.get('data')

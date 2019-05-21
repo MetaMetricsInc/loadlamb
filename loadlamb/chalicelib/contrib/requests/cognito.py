@@ -2,8 +2,8 @@ import asyncio
 import random
 import time
 
-from loadlamb.request import Request
-from loadlamb.response import Response
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
 
 from warrant_lite import WarrantLite
 

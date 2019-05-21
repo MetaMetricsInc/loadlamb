@@ -1,7 +1,7 @@
 import asyncio
 
-from loadlamb.load import LoadLamb
-from loadlamb.contrib.db.models import Run
+from loadlamb.chalicelib.load import LoadLamb
+from loadlamb.chalicelib.contrib.db.models import Run
 
 
 class LoadLambTestRunner(object):
@@ -46,7 +46,8 @@ class DjangoTestRunner(LoadLambTestRunner):
         'user_batch_size': 10,
         'user_batch_sleep': 2,
         'tasks': [
-            {'path': '/accounts/profile/', 'request_class': 'loadlamb.contrib.requests.django_login.DjangoLogin',
+            {'path': '/accounts/profile/',
+             'request_class': 'loadlamb.chalicelib.contrib.requests.django_login.DjangoLogin',
              'data': [{'username': 'loadlamb', 'password': '12345678'},
                       {'username': 'loadlamb2', 'password': '12345678'},
              ]}

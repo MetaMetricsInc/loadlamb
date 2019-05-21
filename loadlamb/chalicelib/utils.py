@@ -20,16 +20,14 @@ from unipath import FSPath as path
 import sammy as sm
 
 import loadlamb
-from loadlamb.contrib.db.loading import docb_handler
+from loadlamb.chalicelib.contrib.db.loading import docb_handler
 
-from loadlamb.sam import s, r, s3t
-
-
+from loadlamb.chalicelib.sam import s, r, s3t
 
 cf = boto3.client('cloudformation')
 
 CLI_TEMPLATES = jinja2.Environment(loader=jinja2.PackageLoader(
-    'loadlamb', 'templates'))
+    'loadlamb.chalicelib', 'templates'))
 
 
 async def get_form_values(resp):
@@ -124,13 +122,15 @@ def create_extension_template(name, description, config_file='loadlamb.yaml'):
     create_config_file(t, filename=config_file)
 
 
-def execute_loadlamb(region_name=None, config_file=None, profile_name='default'):
+def execute_loadlamb(region_name=None, config_file=None, profile_name='default', stage='dev'):
     sess = boto3.Session(profile_name=profile_name)
+    config = read_config_file(config_file=config_file)
+    config['active_stage'] = stage
     lm = sess.client('lambda', region_name=region_name)
     lm.invoke(
         FunctionName='loadlamb-run',
         InvocationType='Event',
-        Payload=json.dumps(read_config_file(config_file=config_file)),
+        Payload=json.dumps(config),
     )
 
 
@@ -237,8 +237,9 @@ class Deploy(object):
         self.remove_zip_venv()
         # TODO: Add profile_name to publish_global in DocB
         try:
-            docb_handler.publish_global('loadlamb', 'loadlambddb', 'loadlambddb', 'dynamodb', replication_groups=regions,
-                                    profile_name=self.profile_name)
+            docb_handler.publish_global('loadlamb', 'loadlambddb', 'loadlambddb', 'dynamodb',
+                                        replication_groups=regions,
+                                        profile_name=self.profile_name)
         except Exception:
             pass
 

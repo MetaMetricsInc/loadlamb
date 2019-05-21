@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from loadlamb.utils import grouper, import_util, save_sam_template, read_config_file, create_config_file, \
+from loadlamb.chalicelib.utils import grouper, import_util, save_sam_template, read_config_file, create_config_file, \
     create_extension_template
 
 from docb import Document
@@ -27,7 +27,7 @@ def test_grouper():
 
 
 def test_import_util():
-    u = import_util('loadlamb.contrib.db.models.Run')
+    u = import_util('loadlamb.chalicelib.contrib.db.models.Run')
     assert issubclass(u, Document)
 
 
