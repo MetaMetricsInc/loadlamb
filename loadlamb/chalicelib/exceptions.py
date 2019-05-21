@@ -1,2 +1,0 @@
-class NoConfigError(Exception):
-    pass

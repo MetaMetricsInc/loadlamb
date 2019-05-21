@@ -1,9 +1,7 @@
-import os
-
 import click
 
-from loadlamb.contrib.db.models import Run
-from loadlamb.utils import create_config_file, read_config_file, Deploy, create_extension_template, execute_loadlamb, \
+from loadlamb.chalicelib.contrib.db.models import Run
+from loadlamb.chalicelib.utils import create_config_file, read_config_file, Deploy, create_extension_template, execute_loadlamb, \
     save_sam_template
 
 
@@ -51,8 +49,9 @@ def create_extension(name, description):
 @click.option('--region')
 @click.option('--filename')
 @click.option('--profile_name')
-def execute(region='us-east-1', filename='loadlamb.yaml', profile_name='default'):
-    execute_loadlamb(region, filename, profile_name)
+@click.option('--stage')
+def execute(region='us-east-1', filename='loadlamb.yaml', profile_name='default', stage='dev'):
+    execute_loadlamb(region, filename, profile_name, stage)
 
 
 @loadlamb.command()

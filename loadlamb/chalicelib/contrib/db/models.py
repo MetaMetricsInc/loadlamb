@@ -7,10 +7,21 @@ class Project(docb.Document):
     name = docb.CharProperty(required=True)
     project_slug = docb.SlugProperty(required=True, unique=True)
     repo_url = docb.CharProperty()
-    url = docb.CharProperty()
+    deployment_type = docb.SlugProperty()
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        use_db = 'dynamodb'
+        handler = docb_handler
+
+
+class Stage(docb.Document):
+    name = docb.CharProperty(required=True)
+    project_slug = docb.SlugProperty(required=True)
+    url = docb.CharProperty()
+    last_modified = docb.DateTimeProperty(auto_now_add=True)
 
     class Meta:
         use_db = 'dynamodb'

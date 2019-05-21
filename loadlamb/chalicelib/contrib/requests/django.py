@@ -2,16 +2,15 @@ import asyncio
 import random
 import time
 
-from loadlamb.request import Request
-from loadlamb.response import Response
-from loadlamb.utils import get_csrf_token
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
+from loadlamb.chalicelib.utils import get_csrf_token
 
 
 class DjangoPost(Request):
 
     async def run(self):
-        url = '{}{}'.format(
-            self.proj_config.get('url'), self.req_config.get('path'))
+        url = '{}{}'.format(self.get_url(), self.req_config.get('path'))
         try:
             a = await self.session.request('get', url)
         except asyncio.TimeoutError:

@@ -1,0 +1,16 @@
+aiohttp>=3.5.4
+beautifulsoup4>=4.6.0
+base58>=1.0.0
+boto3>=1.7.37
+chalice>=1.6.2
+click>=6.7
+docb>=1.1.1
+jinja2>=2.10
+pip>=10
+python-slugify>=1.2.5
+PyYAML>=3.12
+requests>=2.19.0
+sammy>=0.4.3
+troposphere>=2.3.0
+unipath>=1.1
+warrant-lite>=1.0.3

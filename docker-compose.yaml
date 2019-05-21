@@ -4,15 +4,13 @@ services:
   flask:
     restart: always
     build: .
-    expose:
-      - "5001"
     ports:
-      - 5001:5000
+      - 5000:5000
     volumes:
       - .:/code/loadlamb
     command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/flask run -h 0.0.0.0
     env_file: .env
-    working_dir: /code/loadlamb/loadlamb/tests/wsgi/flaskr/
+    working_dir: /code/loadlamb/loadlamb/chalicelib/tests/wsgi/flaskr/
 
   loadlamb:
     restart: always
@@ -24,28 +22,35 @@ services:
     volumes:
       - .:/code/loadlamb
     env_file: .env
-    working_dir: /code/loadlamb/loadlamb/loadlambapi/
+    working_dir: /code/loadlamb/loadlamb/
     command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/chalice local --host 0.0.0.0 --port 7000
+
   unittest:
     restart: always
+    links:
+      - dynamodb:dynamodb
+      - django:django
+      - flask:flask
+    depends_on:
+      - dynamodb
+      - django
+      - flask
     build: .
     volumes:
       - .:/code/loadlamb
     env_file: .env
-    working_dir: /code/loadlamb/
+    working_dir: /code/loadlamb
 
   django:
     restart: always
     build: .
-    expose:
-      - "8001"
     ports:
       - 8001:8001
     volumes:
       - .:/code/loadlamb
     command: /root/.cache/pypoetry/virtualenvs/loadlamb-py3.6/bin/python manage.py runserver 0.0.0.0:8001
     env_file: .env
-    working_dir: /code/loadlamb/loadlamb/tests/wsgi/djangor/
+    working_dir: /code/loadlamb/loadlamb/chalicelib/tests/wsgi/djangor/
 
   dynamodb:
     image: instructure/dynamo-local-admin

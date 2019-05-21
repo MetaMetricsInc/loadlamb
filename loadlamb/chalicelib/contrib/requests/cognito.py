@@ -2,8 +2,8 @@ import asyncio
 import random
 import time
 
-from loadlamb.request import Request
-from loadlamb.response import Response
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
 
 from warrant_lite import WarrantLite
 
@@ -19,7 +19,7 @@ class CogntioRequest(Request):
         Executes a single request
         :return: Response class
         """
-        path = '{}{}'.format(self.proj_config.get('url'),
+        path = '{}{}'.format(self.get_url(),
                              self.req_config.get('path'))
 
         method_type = self.req_config.get('method_type')

@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "app_name": "loadlamb-api",
+  "app_name": "loadlambapi",
   "stages": {
     "dev": {
       "api_gateway_stage": "api"

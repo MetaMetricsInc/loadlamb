@@ -1,63 +1,47 @@
+import asyncio
 import random
+import time
 
 from loadlamb.chalicelib.request import Request
-from loadlamb.chalicelib.response import Response
-from loadlamb.chalicelib.utils import get_form_values, get_csrf_token, get_form_action
+from loadlamb.response import Response
+from loadlamb.chalicelib.utils import get_form_values, get_csrf_token
 
 
 class RemoteLogin(Request):
 
-    def run(self):
-        responses = []
+    async def run(self):
         url = '{}{}'.format(
-            self.proj_config.get('url'),self.req_config.get('path'))
+            self.get_url(), self.req_config.get('path'))
 
-        # Request to the login url on the main site
-        a = self.session.get(url)
+        start_time = time.perf_counter()
+        try:
+            a = await self.session.request('get', url, timeout=self.timeout)
+        except asyncio.TimeoutError:
+            return await self.get_null_response(self.timeout)
+        login_url = '{}{}'.format(self.proj_config.get('url'), self.req_config.get('login_url'))
+        try:
+            b = await self.session.request('post', login_url, data=await get_form_values(a),
+                                           timeout=self.timeout)
+        except asyncio.TimeoutError:
+            return await self.get_null_response(self.timeout)
 
-        responses.append(Response(a,self.req_config,
-                                  self.proj_config.get('project_slug'),
-                                  self.proj_config.get('run_slug')))
+        try:
+            c = await self.session.request('get', b.url)
+        except asyncio.TimeoutError:
+            return await self.get_null_response(self.timeout)
 
-        # Add referer header to the session based on the url from the previous request
-        self.session.headers.update({'Referer': a.url})
-        # POST request to the login url on the remote site using the
-        # form values from request A
-
-        b = self.session.post(get_form_action(a), data=get_form_values(a),allow_redirects=False)
-        responses.append(Response(b, self.req_config,
-                                  self.proj_config.get('project_slug'),
-                                  self.proj_config.get('run_slug')))
-
-        location_url = b.headers['Location']
-        self.session.headers.update({'Referer': b.url})
-        c = self.session.get(self.req_config.get('login_url'), cookies=b.cookies.get_dict())
-        responses.append(Response(c, self.req_config,
-                                  self.proj_config.get('project_slug'),
-                                  self.proj_config.get('run_slug')))
-
-
-
-
-
-        # Choose a user at random to log in as
         user = random.choice(self.req_config.get('users'))
-        form_data = {'username': user.get('username'),
-                                        'password': user.get('password'),
-                                        'csrfmiddlewaretoken': get_csrf_token(c)}
+        try:
+            d = await self.session.request('post', b.url, headers={'referer': url}, timeout=self.timeout,
+                                       data={'username': user.get('username'), 'password': user.get('password'),
+                                            'csrfmiddlewaretoken': get_csrf_token(c)})
+        except asyncio.TimeoutError:
+            return await self.get_null_response(self.timeout)
 
-        # POST request to the login url on the remote site
-        d = self.session.post(c.url, data=form_data)
+        end_time = time.perf_counter()
+        resp = Response(d, self.req_config,
+                        self.proj_config.get('project_slug'),
+                        self.proj_config.get('run_slug'), end_time - start_time, self.user_no, self.group_no)
+        await resp.assert_contains()
+        return await resp.get_ltr()
 
-        responses.append(Response(d, self.req_config,
-                                  self.proj_config.get('project_slug'),
-                                  self.proj_config.get('run_slug')))
-
-        e = self.session.post(get_form_action(d),data=get_form_values(d))
-        responses.append(Response(e, self.req_config,
-                                  self.proj_config.get('project_slug'),
-                                  self.proj_config.get('run_slug')))
-        # Remove the Referer header from the session
-        self.session.headers.pop('Referer')
-
-        return responses

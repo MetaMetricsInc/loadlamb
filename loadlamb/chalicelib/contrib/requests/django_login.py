@@ -2,16 +2,16 @@ import asyncio
 import random
 import time
 
-from loadlamb.request import Request
-from loadlamb.response import Response
-from loadlamb.utils import get_csrf_token
+from loadlamb.chalicelib.request import Request
+from loadlamb.chalicelib.response import Response
+from loadlamb.chalicelib.utils import get_csrf_token
 
 
-class DjangoPost(Request):
+class DjangoLogin(Request):
 
     async def run(self):
         url = '{}{}'.format(
-            self.proj_config.get('url'), self.req_config.get('path'))
+            self.get_url(), self.req_config.get('path'))
         try:
             a = await self.session.request('get', url)
         except asyncio.TimeoutError:
@@ -23,15 +23,14 @@ class DjangoPost(Request):
             return await self.get_null_response(self.timeout)
         start_time = time.perf_counter()
         try:
-            b = await self.session.request('post', url, data=data, headers={'referer': url})
+            b = await self.session.request('post', a.url, data=data, headers={'referer': url})
         except asyncio.TimeoutError:
             return await self.get_null_response(self.timeout)
-
 
         end_time = time.perf_counter()
         time_taken = end_time - start_time
         resp = Response(b, self.req_config,
                         self.proj_config.get('project_slug'),
                         self.proj_config.get('run_slug'), time_taken, self.user_no, self.group_no)
-        resp.assert_contains()
+        await resp.assert_contains()
         return await resp.get_ltr()

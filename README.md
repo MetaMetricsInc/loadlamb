@@ -73,7 +73,7 @@ loadlamb deploy
 
 This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SQS message. 
 ```bash
-loadlamb execute
+loadlamb execute --stage dev --region us-east-1 --filename loadlamb.example.yaml --profile_name default
 ```
 
 ### Non-Essential Commands 
@@ -99,9 +99,15 @@ loadlamb create_package
 ```yaml
 bucket: your_bucket # The bucket the code (loadlamb.zip) will be uploaded to.
 name: your_project_name # The name of the project
-url: https://example.org # The base url of the site you're testing
+repo_url: https://github.com/example/example # The repo url of the site you're testing
 user_num: 50 # The number of users to simulate
 user_batch_size: 10 # The number of users we create at a time. Value should be from 1-10
+user_batch_sleep: 5 # The number of seconds that LoadLamb should sleep between user groups 
+stages:
+- name: staging
+  url: http://staging.example.org/
+- name: prod
+  url: http://example.org
 tasks: # Lists of tasks for each simulated user
 - path: / # The path on the site for the request 
   method_type: GET # The HTTP method that should be used
