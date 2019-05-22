@@ -1,5 +1,5 @@
 from chalice import Chalice
-from chalicelib.contrib.db.models import Run
+from chalicelib.contrib.db.models import Run, Group, LoadTestResponse
 
 app = Chalice(app_name='loadlambapi')
 
@@ -40,14 +40,28 @@ def get_runs(project_slug):
 @app.route('/run/{run_slug}', cors=True)
 def get_run(run_slug):
     obj = Run.objects().get({'run_slug': run_slug})
+    groups = [run_to_json(i) for i in Group.objects().filter({'run_slug': run_slug}, sort_attr='group_no')]
     return {
-        'item': run_to_json(obj)
+        'item': run_to_json(obj),
+        'items': groups
     }
 
 
-@app.route('/run/{run_slug}/groups', cors=True)
-def get_groups(run_slug):
-    return {}
+@app.route('/group/{group_id}', cors=True)
+def get_group(group_id):
+    group = Group.get(group_id)
+    return {
+        'item': run_to_json(group),
+        'items': [i._data for i in LoadTestResponse.objects().filter({'run_slug':group.run_slug,
+                                                                             'group_no': group.group_no})]
+    }
+
+
+@app.route('/ltr/{ltr_id}', cors=True)
+def get_ltr(ltr_id):
+    return {
+        'item': LoadTestResponse.get(ltr_id)._data
+    }
 
 
 @app.route('/latest-run', cors=True)
