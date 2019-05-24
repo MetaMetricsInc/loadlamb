@@ -21,7 +21,7 @@ class Stage(docb.Document):
     name = docb.CharProperty(required=True)
     project_slug = docb.SlugProperty(required=True)
     url = docb.CharProperty()
-    repo_branch = docb.CharProperty(required=True)
+    branch = docb.CharProperty(required=True)
     last_modified = docb.DateTimeProperty(auto_now_add=True)
 
     class Meta:
