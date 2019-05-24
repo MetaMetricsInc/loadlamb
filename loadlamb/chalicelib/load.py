@@ -32,7 +32,8 @@ class LoadLamb(object):
             try:
                 Stage.objects().get({'project_slug': project_slug, 'name': stage.get('name')})
             except QueryError:
-                stg = Stage(name=stage.get('name'), url=stage.get('url'), project_slug=project_slug)
+                stg = Stage(name=stage.get('name'), url=stage.get('url'), project_slug=project_slug,
+                            branch=stage.get('branch'))
                 stg.save()
 
     async def run(self):

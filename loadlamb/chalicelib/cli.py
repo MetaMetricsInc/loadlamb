@@ -24,9 +24,10 @@ def validate_regions(ctx, param, value):
 @click.option('--regions', prompt=True, callback=validate_regions,
               help='Comma delimited list of AWS region short names. ex. us-east-1, us-east-2')
 @click.option('--default_stage_name', prompt=True)
+@click.option('--default_stage_branch', prompt=True)
 @click.option('--filename', default='loadlamb.yaml')
 def create_project(name, url, repo_url, user_num, user_batch_size, user_batch_sleep, regions, default_stage_name,
-                   filename='loadlamb.yaml'):
+                   default_stage_branch, filename='loadlamb.yaml'):
     create_config_file({
         'name': name,
         'repo_url': repo_url,
@@ -34,7 +35,7 @@ def create_project(name, url, repo_url, user_num, user_batch_size, user_batch_sl
         'user_batch_size': int(user_batch_size),
         'user_batch_sleep': int(user_batch_sleep),
         'regions': regions,
-        'stages': [{'name': default_stage_name, 'url': url}],
+        'stages': [{'name': default_stage_name, 'url': url, 'branch': default_stage_branch}],
         'tasks': [{'path': '/', 'method_type': 'GET'}]
     }, filename=filename)
     click.echo(click.style('Project created successfully.', fg='green'))
