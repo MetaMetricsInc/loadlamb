@@ -9,7 +9,7 @@ from docb import Document
 TEST_CONFIG = {
         'name': 'flask',
         'url': 'http://flask:5000',
-        'repo_url': 'https://github.com/metametricsinc/loadlamb',
+        'repo': 'loadlamb',
         'user_num': 10,
         'user_batch_size': 10,
         'user_batch_sleep': 2,
@@ -48,7 +48,7 @@ def test_create_extension_template():
     create_config_file(config=TEST_CONFIG)
     create_extension_template('jelly', 'Test extension')
     assert read_config_file('loadlamb.yaml') == {'name': 'flask',
-                                                 'repo_url': 'https://github.com/metametricsinc/loadlamb',
+                                                 'repo': 'loadlamb',
                                                  'tasks': [{'method_type': 'GET', 'path': '/get'},
                                                            {'method_type': 'POST', 'path': '/post'},
                                                            {'method_type': 'GET', 'path': '/bad-get'}],

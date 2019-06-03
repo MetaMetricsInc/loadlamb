@@ -25,7 +25,7 @@ class LoadLamb(object):
         try:
             Project.objects().get({'project_slug': project_slug})
         except QueryError:
-            pj = Project(project_slug=project_slug, name=self.config['name'], repo_url=self.config['repo_url'])
+            pj = Project(project_slug=project_slug, name=self.config['name'], repo=self.config['repo'])
             pj.save()
 
         for stage in self.config.get('stages', []):

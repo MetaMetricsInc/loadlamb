@@ -17,7 +17,7 @@ def validate_regions(ctx, param, value):
 @loadlamb.command()
 @click.option('--name', prompt=True)
 @click.option('--url', prompt=True, help='Dev stage URL')
-@click.option('--repo_url', prompt=True)
+@click.option('--repo', prompt=True)
 @click.option('--user_num', prompt=True)
 @click.option('--user_batch_size', prompt=True)
 @click.option('--user_batch_sleep', prompt=True)
@@ -26,11 +26,11 @@ def validate_regions(ctx, param, value):
 @click.option('--default_stage_name', prompt=True)
 @click.option('--default_stage_branch', prompt=True)
 @click.option('--filename', default='loadlamb.yaml')
-def create_project(name, url, repo_url, user_num, user_batch_size, user_batch_sleep, regions, default_stage_name,
+def create_project(name, url, repo, user_num, user_batch_size, user_batch_sleep, regions, default_stage_name,
                    default_stage_branch, filename='loadlamb.yaml'):
     create_config_file({
         'name': name,
-        'repo_url': repo_url,
+        'repo': repo,
         'user_num': int(user_num),
         'user_batch_size': int(user_batch_size),
         'user_batch_sleep': int(user_batch_sleep),

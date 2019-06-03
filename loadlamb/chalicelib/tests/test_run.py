@@ -23,7 +23,7 @@ class FlaskTestRunner(LoadLambTestRunner):
 
     loadlamb_config = {
         'name': 'flask',
-        'repo_url': 'https://github.com/metametricsinc/loadlamb',
+        'repo': 'loadlamb',
         'user_num': 10,
         'user_batch_size': 10,
         'user_batch_sleep': 2,
@@ -44,7 +44,7 @@ class DjangoTestRunner(LoadLambTestRunner):
 
     loadlamb_config = {
         'name': 'django',
-        'repo_url': 'https://github.com/metametricsinc/loadlamb',
+        'repo': 'loadlamb',
         'user_num': 10,
         'user_batch_size': 10,
         'user_batch_sleep': 2,
