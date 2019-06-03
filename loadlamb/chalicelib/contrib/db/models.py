@@ -6,7 +6,7 @@ from .loading import docb_handler
 class Project(docb.Document):
     name = docb.CharProperty(required=True)
     project_slug = docb.SlugProperty(required=True, unique=True)
-    repo_url = docb.CharProperty()
+    repo = docb.CharProperty()
     deployment_type = docb.SlugProperty()
 
     def __unicode__(self):

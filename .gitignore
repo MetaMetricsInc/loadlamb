@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.idea/
+loadlamb/.chalice/deployed/*
+loadlamb/.chalice/deployments/*
 # C extensions
 *.so
 *.ipynb
