@@ -178,6 +178,47 @@ class Request(object):
 
 If you want to create a new Request class in your extension there are only one method that is required. That is the **run** method.
 
+### Contrib Request Classes
+
+#### Cognito
+
+##### Project Level Config Attributes
+
+****pool_id:**** Your AWS Cognito Pool ID
+
+****client_id:**** Your AWS Cognito Client ID
+
+##### Request Level Config Attributes
+
+**username:** Cognito user's username
+
+**password:** Cognito user's password
+ 
+```yaml
+bucket: your_bucket # The bucket the code (loadlamb.zip) will be uploaded to.
+name: your_project_name # The name of the project
+repo: example # The repo url of the site you're testing
+user_num: 50 # The number of users to simulate
+user_batch_size: 10 # The number of users we create at a time. Value should be from 1-10
+user_batch_sleep: 5 # The number of seconds that LoadLamb should sleep between user groups 
+pool_id: your-cognito-pool-id # Your AWS Cognito Pool ID
+client_id: your-cognito-client-id # Your AWS Cognito Client ID
+stages:
+- name: staging
+  url: http://staging.example.org/
+- name: prod
+  url: http://example.org
+tasks: # Lists of tasks for each simulated user
+- path: /login/
+  request_class: loadlamb.chalicelib.contrib.requests.cognito.CogntioRequest
+  users:
+  - username: your_user
+    password: your_password
+  - username: your_user2
+    password: your_password
+
+```
+
 ### Response Class
 
 At this point the main purpose of the Response class is to save the result to DynamoDB. In the future you will be able to subclass it and specify a new class in the config.
