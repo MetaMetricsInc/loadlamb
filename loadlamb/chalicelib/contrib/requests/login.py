@@ -30,7 +30,7 @@ class RemoteLogin(Request):
         except asyncio.TimeoutError:
             return await self.get_null_response(self.timeout)
 
-        user = random.choice(self.req_config.get('users'))
+        user = random.choice(self.proj_config.get('users'))
         try:
             d = await self.session.request('post', b.url, headers={'referer': url}, timeout=self.timeout,
                                        data={'username': user.get('username'), 'password': user.get('password'),

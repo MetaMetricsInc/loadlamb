@@ -29,7 +29,7 @@ class CogntioRequest(Request):
         try:
             self.session._loadlamb_tokens
         except AttributeError:
-            user = random.choice(self.req_config.get('users'))
+            user = random.choice(self.proj_config.get('users'))
             wl = WarrantLite(
                 username=user.get('username'), password=user.get('password'), pool_id=self.proj_config.get('pool_id'),
                 client_id=self.proj_config.get('client_id')

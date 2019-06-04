@@ -102,7 +102,12 @@ name: your_project_name # The name of the project
 repo: example # The repo url of the site you're testing
 user_num: 50 # The number of users to simulate
 user_batch_size: 10 # The number of users we create at a time. Value should be from 1-10
-user_batch_sleep: 5 # The number of seconds that LoadLamb should sleep between user groups 
+user_batch_sleep: 5 # The number of seconds that LoadLamb should sleep between user groups
+users:
+  - username: your_user
+    password: your_password
+  - username: your_user2
+    password: your_password 
 stages:
 - name: staging
   url: http://staging.example.org/
@@ -114,11 +119,6 @@ tasks: # Lists of tasks for each simulated user
   contains: Welcome # Test to make sure the specified text appears on the page
 - path: /login/
   request_class: loadlamb.contrib.requests.login.RemoteLogin
-  users:
-  - username: your_user
-    password: your_password
-  - username: your_user2
-    password: your_password
 - path: /account/profile/
   method_type: GET
   contains: My Profile
@@ -203,6 +203,11 @@ user_batch_size: 10 # The number of users we create at a time. Value should be f
 user_batch_sleep: 5 # The number of seconds that LoadLamb should sleep between user groups 
 pool_id: your-cognito-pool-id # Your AWS Cognito Pool ID
 client_id: your-cognito-client-id # Your AWS Cognito Client ID
+users:
+  - username: your_user
+    password: your_password
+  - username: your_user2
+    password: your_password
 stages:
 - name: staging
   url: http://staging.example.org/
@@ -211,12 +216,6 @@ stages:
 tasks: # Lists of tasks for each simulated user
 - path: /login/
   request_class: loadlamb.chalicelib.contrib.requests.cognito.CogntioRequest
-  users:
-  - username: your_user
-    password: your_password
-  - username: your_user2
-    password: your_password
-
 ```
 
 ### Response Class
