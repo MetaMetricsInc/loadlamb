@@ -31,6 +31,7 @@ class Stage(docb.Document):
 
 class Run(docb.Document):
     run_slug = docb.SlugProperty(global_index=True, unique=True)
+    stage = docb.SlugProperty()
     project_slug = docb.SlugProperty(global_index=True)
     requests = docb.IntegerProperty(required=False)
     requests_per_second = docb.FloatProperty(required=False)

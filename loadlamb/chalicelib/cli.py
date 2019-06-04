@@ -49,12 +49,12 @@ def create_extension(name, description):
 
 
 @loadlamb.command()
+@click.argument('stage')
 @click.option('--region')
 @click.option('--filename')
 @click.option('--profile_name')
-@click.option('--stage')
-def execute(region='us-east-1', filename='loadlamb.yaml', profile_name='default', stage='dev'):
-    execute_loadlamb(region, filename, profile_name, stage)
+def execute(stage, region='us-east-1', filename='loadlamb.yaml', profile_name='default'):
+    execute_loadlamb(stage, region, filename, profile_name)
 
 
 @loadlamb.command()

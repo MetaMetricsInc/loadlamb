@@ -52,8 +52,8 @@ def get_group(group_id):
     group = Group.get(group_id)
     return {
         'item': run_to_json(group),
-        'items': [i._data for i in LoadTestResponse.objects().filter({'run_slug':group.run_slug,
-                                                                             'group_no': group.group_no})]
+        'items': [i._data for i in LoadTestResponse.objects().filter({'run_slug': group.run_slug,
+                                                                      'group_no': group.group_no})]
     }
 
 
@@ -76,9 +76,10 @@ def latest_run():
             'error': 'No Runs'
         }
 
+
 @app.route('/latest-run/{project_slug}', cors=True)
 def latest_run_project(project_slug):
-    obj_list = Run.objects().filter({'project_slug':project_slug}, sort_attr='date_created', sort_reverse=True)
+    obj_list = Run.objects().filter({'project_slug': project_slug}, sort_attr='date_created', sort_reverse=True)
     try:
         return {
             'item': run_to_json(obj_list[0])
@@ -87,6 +88,7 @@ def latest_run_project(project_slug):
         return {
             'error': 'No Runs'
         }
+
 
 @app.route('/run-compare/{run_a}/{run_b}')
 def compare_run(run_a, run_b):

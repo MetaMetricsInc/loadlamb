@@ -122,7 +122,7 @@ def create_extension_template(name, description, config_file='loadlamb.yaml'):
     create_config_file(t, filename=config_file)
 
 
-def execute_loadlamb(region_name=None, config_file=None, profile_name='default', stage='dev'):
+def execute_loadlamb(stage, region_name=None, config_file=None, profile_name='default'):
     sess = boto3.Session(profile_name=profile_name)
     config = read_config_file(config_file=config_file)
     config['active_stage'] = stage
