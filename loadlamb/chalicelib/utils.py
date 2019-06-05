@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from unipath import FSPath as path
 import sammy as sm
 
-import loadlamb
+import loadlamb.chalicelib
 from loadlamb.chalicelib.contrib.db.loading import docb_handler
 
 from loadlamb.chalicelib.sam import s, r, s3t
@@ -256,7 +256,7 @@ class Deploy(object):
         """
         return path(
             os.path.dirname(
-                inspect.getsourcefile(loadlamb))).ancestor(1)
+                inspect.getsourcefile(loadlamb.chalicelib))).ancestor(0)
 
     def copy_loadlamb(self):
         # Get loadlamb's path in the user's virtualenv
