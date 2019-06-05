@@ -31,7 +31,7 @@ f = sm.Function(name='loadlambpush',
                 CodeUri=sm.S3URI(
                     Bucket=sm.Ref(Ref='CodeBucket'),
                     Key=sm.Ref(Ref='CodeZipKey')),
-                Handler='loadlamb.lambdas.run_handler',
+                Handler='loadlamb.chalicelib.lambdas.run_handler',
                 Runtime='python3.6',
                 Timeout=900,
                 MemorySize=3008,
