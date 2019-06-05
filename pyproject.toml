@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "loadlamb"
-version = "0.5.7"
+version = "0.5.8"
 description = "Load testing library built to run on AWS Lambda"
 authors = ["Brian Jinwright <brian@ipoots.com>"]
 license = "BSD-3-Clause"
