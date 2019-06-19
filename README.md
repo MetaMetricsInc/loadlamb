@@ -4,7 +4,7 @@ A load testing util built to run on AWS Lambda with SQS and DynamoDB.
 
 ## Current Status
 
-Alpha
+Beta
 
 ## Install
 
@@ -22,22 +22,11 @@ pip install loadlamb
 6. Keep a persistent record of the test results. This is important so action can be taken if code is pushed that drastically reduces performance.
 7. Extendable with for different workflows (remote login, OpenID, API auth, and etc.)
 
-## How it Works (currently)
-
-**IMPORTANT:** Remember this project is still in its alpha stage. 
-
-### Execute/SQS Push
-
-Currently, the load test kicks off by the CLI invoking the **"Push"** AWS Lambda function sending the config to the function as the event. This function sends the config to the SQS Queue the same number times specified in the **user_num** attribute. 
-
-### Pull messages from SQS/Make Requests
-
-This triggers the **"Pull"** Lambda function, and it makes the requests from the tasks section of the project's config using the Requests library's Session class via the [Request](#request-class) class (loadlamb.request.Request). This happens independently for each user specified in user_num. For example, if you specify 500 users then 500 SQS messages will be sent, triggering 500 Lambdas, which means the tasks will be run 500 times with different sessions. 
+## How it Works (currently)  
 
 ### Save Data
 
 After all of the requests are made we save the results in DynamoDB.
-   
 
 ## CLI
 

@@ -20,6 +20,7 @@ requests = "^2.21"
 sammy = "^0.4.3"
 unipath = "^1.1"
 warrant-lite = "^1.0"
+aiohttp_xmlrpc = "^0.7.4"
 
 [tool.poetry.dev-dependencies]
 Django = "^2.2"
