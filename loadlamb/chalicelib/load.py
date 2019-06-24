@@ -48,6 +48,7 @@ class LoadLamb(object):
         run.save()
         self.config['project_slug'] = project_slug
         self.config['run_slug'] = run_slug
+        skip_body = self.config.get('skip_body', False)
         no_requests = self.config['user_num'] * len(self.config['tasks'])
         start_time = time.perf_counter()
         timeout = aiohttp.ClientTimeout(total=self.config.get('timeout', 60))
@@ -70,6 +71,12 @@ class LoadLamb(object):
             self.groups = results
             self.responses = list(itertools.chain.from_iterable([g.responses for g in results]))
             GroupModel().bulk_save(self.groups)
+            if skip_body:
+                resps = []
+                for i in self.responses:
+                    i.body = None
+                    resps.append(i)
+                self.responses = resps
             LoadTestResponse().bulk_save(self.responses)
             run.requests = no_requests
             run.requests_per_second = GroupModel.objects().filter({'project_slug': project_slug,

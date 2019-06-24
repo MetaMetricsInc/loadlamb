@@ -1,14 +1,11 @@
 import asyncio
-import random
 import time
 
 from loadlamb.chalicelib.request import Request
 from loadlamb.chalicelib.response import Response
 
-from warrant_lite import WarrantLite
 
-
-class CognitoRequest(Request):
+class XMLRPCRequest(Request):
 
     def get_timeout(self):
         return self.req_config.get('timeout') or \
@@ -26,32 +23,17 @@ class CognitoRequest(Request):
         data = self.req_config.get('data')
         params = self.req_config.get('params')
 
-        try:
-            self.session._loadlamb_tokens
-        except AttributeError:
-            user = random.choice(self.proj_config.get('users'))
-            wl = WarrantLite(
-                username=user.get('username'), password=user.get('password'), pool_id=self.proj_config.get('pool_id'),
-                client_id=self.proj_config.get('client_id')
-
-            )
-
-            self.session._loadlamb_tokens = wl.authenticate_user()
-
-
-        headers = {'Authorization': self.session._loadlamb_tokens['AuthenticationResult']['IdToken'],
-                   'Accept':'application/json; version=1.0'}
         start_time = time.perf_counter()
         try:
             if data:
                 data = self.get_choice(data)
-                resp = await self.session.request(method_type, path, headers=headers, json=data, timeout=self.timeout)
+                resp = await self.session.request(method_type, path, json=data, timeout=self.timeout)
             elif params:
                 params = self.get_choice(params)
-                resp = await self.session.request(method_type, path, headers=headers, payload=params,
+                resp = await self.session.request(method_type, path, payload=params,
                                                   timeout=self.timeout)
             else:
-                resp = await self.session.request(method_type, path, headers=headers)
+                resp = await self.session.request(method_type, path)
         except asyncio.TimeoutError:
             return await self.get_null_response(self.timeout)
         end_time = time.perf_counter()
