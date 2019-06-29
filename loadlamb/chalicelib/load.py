@@ -74,7 +74,8 @@ class LoadLamb(object):
             if skip_body:
                 resps = []
                 for i in self.responses:
-                    i.body = None
+                    if i.status_code < 500:
+                        i.body = None
                     resps.append(i)
                 self.responses = resps
             LoadTestResponse().bulk_save(self.responses)

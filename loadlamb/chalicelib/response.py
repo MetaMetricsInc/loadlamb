@@ -2,12 +2,15 @@ from loadlamb.chalicelib.contrib.db.models import LoadTestResponse
 
 
 class Response(object):
-    def __init__(self, response, request_config, project_slug, run_slug, time_taken, user_no, group_no):
+    def __init__(self, response, request_config, project_slug, run_slug, time_taken, user_no, group_no, text=None,
+                 status_code=None):
         self.response = response
         self.request_config = request_config
         self.time_taken = time_taken
         self.project_slug = project_slug
         self.run_slug = run_slug
+        self.text = text
+        self.status_code = status_code
         self.user_no = user_no
         self.group_no = group_no
 
@@ -22,13 +25,13 @@ class Response(object):
     async def get_ltr(self):
         return LoadTestResponse(
             run_slug=self.run_slug,
-            body=await self.response.text(),
+            body=self.text or await self.response.text(),
             user_no=self.user_no,
             group_no=self.group_no,
             project_slug=self.project_slug,
             path=self.request_config.get('path'),
             elapsed_time=self.time_taken,
             contains_string=self.request_config.get('contains'),
-            status_code=self.response.status,
+            status_code=self.status_code or self.response.status,
             method_type=self.request_config.get('method_type')
         )
