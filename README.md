@@ -8,9 +8,12 @@ Beta
 
 ## Install
 
+### Via Pip
 ```python    
 pip install loadlamb
 ```
+
+### Via Cloudformation
 
 ## Project Goals
 
@@ -62,7 +65,7 @@ loadlamb deploy
 
 This command uses boto3 to execute the **push_handler** Lambda function by using the contents of the **loadlamb.yaml** as the event (payload) argument. Which sends the config as an SQS message. 
 ```bash
-loadlamb execute --stage dev --region us-east-1 --filename loadlamb.example.yaml --profile_name default
+loadlamb execute --stage dev --region us-east-1 --filename loadlamb.example.yaml --profile_name default --save_responses True
 ```
 
 ### Non-Essential Commands 

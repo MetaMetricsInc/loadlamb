@@ -122,11 +122,13 @@ def create_extension_template(name, description, config_file='loadlamb.yaml'):
     create_config_file(t, filename=config_file)
 
 
-def execute_loadlamb(stage, region_name=None, config_file=None, profile_name='default', skip_body=False):
+def execute_loadlamb(stage, region_name=None, config_file=None, profile_name='default', skip_body=False,
+                     save_responss=False):
     sess = boto3.Session(profile_name=profile_name)
     config = read_config_file(config_file=config_file)
     config['active_stage'] = stage
     config['skip_body'] = skip_body
+    config['save_responses'] = save_responss
     lm = sess.client('lambda', region_name=region_name)
     lm.invoke(
         FunctionName='loadlamb-run',

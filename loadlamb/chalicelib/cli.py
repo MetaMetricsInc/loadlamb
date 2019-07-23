@@ -54,8 +54,10 @@ def create_extension(name, description):
 @click.option('--filename')
 @click.option('--profile_name')
 @click.option('--skip_body')
-def execute(stage, region='us-east-1', filename='loadlamb.yaml', profile_name='default', skip_body=False):
-    execute_loadlamb(stage, region, filename, profile_name, skip_body)
+@click.option('--save_responses')
+def execute(stage, region='us-east-1', filename='loadlamb.yaml', profile_name='default', skip_body=False,
+            save_resonses=False):
+    execute_loadlamb(stage, region, filename, profile_name, skip_body, save_resonses)
 
 
 @loadlamb.command()
